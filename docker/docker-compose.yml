@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  postit:
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.postit.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.postit.entrypoints=web"
+    networks:
+      traefik:
+
+networks:
+  traefik:
+    external:
+      name: traefik

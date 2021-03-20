@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  postit:
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.prod
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ../:/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.postit.rule=Host(`api.emotives.net`)"
+      - "traefik.http.routers.postit.tls=true"
+      - "traefik.http.routers.postit.tls.certresolver=letsencrypt"
+    networks:
+      traefik:
+
+networks:
+  traefik:
+    external:
+      name: traefik
