@@ -1,1 +1,3 @@
 # postit
+
+--network="host
