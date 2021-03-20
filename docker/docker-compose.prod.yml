@@ -10,7 +10,7 @@ services:
       - ../:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.postit.rule=Host(`api.emotives.net`)"
+      - "traefik.http.routers.postit.rule=Host(`postit.emotives.net`)"
       - "traefik.http.routers.postit.tls=true"
       - "traefik.http.routers.postit.tls.certresolver=letsencrypt"
     networks:
