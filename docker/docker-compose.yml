@@ -10,7 +10,7 @@ services:
       - ../:/app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.postit.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"
       - "traefik.http.routers.postit.entrypoints=web"
     networks:
       traefik:

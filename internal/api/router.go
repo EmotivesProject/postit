@@ -10,7 +10,7 @@ func CreateRouter() chi.Router {
 
 	r.Use(SimpleMiddleware())
 
-	r.Route("/postit/", func(r chi.Router) {
+	r.Route("/", func(r chi.Router) {
 		r.Get("/healthz", healthz)
 
 	})
