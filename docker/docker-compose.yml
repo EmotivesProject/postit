@@ -12,18 +12,22 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"
       - "traefik.http.routers.postit.entrypoints=web"
+      - "traefik.docker.network=traefik"
     networks:
       traefik:
       postit:
   postit-mongo:
     image: mongo:latest
+    hostname: mongodb-server
     environment:
+      MONGO_INITDB_DATABASE: postit-db
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
     ports:
       - 27017:27017
     volumes:
       - mongodb_data_container:/data/db
+      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       postit:
 
