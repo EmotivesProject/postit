@@ -71,6 +71,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("SAVED NEW USER")
+
 	resultResponseJSON(w, http.StatusCreated, result)
 }
 

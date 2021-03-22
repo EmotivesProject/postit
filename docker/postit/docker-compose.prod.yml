@@ -18,6 +18,9 @@ services:
     networks:
       traefik:
       default:
+      emotives:
+        aliases:
+          - postit
   mongo:
     image: mongo:latest
     environment:
@@ -37,6 +40,9 @@ volumes:
   mongodb_data:
 
 networks:
+  emotives:
+    external:
+      name: emotives
   default:
   traefik:
     external:
