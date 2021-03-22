@@ -13,7 +13,14 @@ func CreateRouter() chi.Router {
 	r.Route("/", func(r chi.Router) {
 		r.Get("/healthz", healthz)
 
-		r.Route("/post", func(r chi.Router) {
+		r.Route("/user", func(r chi.Router) {
+			r.Post("/", createUser)
+			r.Route("/{encoded_id}", func(r chi.Router) {
+				r.Get("/", fetchUser)
+			})
+		})
+
+		r.With(verifyJTW()).Route("/post", func(r chi.Router) {
 			r.Get("/", fetchPost)
 			r.Post("/", createPost)
 

@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect() *mongo.Collection {
+func Connect() *mongo.Database {
 	// Set client options
 	clientOptions := options.Client().ApplyURI("mongodb://admin:admin@mongo:27017")
 
@@ -28,5 +28,5 @@ func Connect() *mongo.Collection {
 
 	fmt.Println("Connected to MongoDB!")
 
-	return client.Database("postit-db").Collection("posts")
+	return client.Database("postit-db")
 }

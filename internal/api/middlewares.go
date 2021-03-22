@@ -1,8 +1,39 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"net/http"
+	"postit/model"
+	"postit/pkg/auth"
 )
+
+type key string
+
+const (
+	userID key = "encodedID"
+)
+
+var (
+	errUnauthorised = errors.New("Not authorised")
+)
+
+func verifyJTW() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			header := r.Header.Get("authorization")
+			user, err := auth.Validate(header)
+			if err != nil {
+				messageResponseJSON(w, http.StatusBadRequest, model.Message{
+					Message: errUnauthorised.Error(),
+				})
+				return
+			}
+			ctx := context.WithValue(r.Context(), userID, user.EncodedID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
 
 func SimpleMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

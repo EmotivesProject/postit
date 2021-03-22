@@ -19,7 +19,7 @@ import (
 
 var (
 	limit             int64 = 5
-	postitCollection        = db.Connect()
+	postitDatabase          = db.Connect()
 	errFailedDecoding       = errors.New("Failed during decoding request")
 )
 
@@ -28,6 +28,12 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
+	encodedID := r.Context().Value(userID).(string)
+	if encodedID == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "yo"})
+		return
+	}
+
 	post := &model.Post{}
 	err := json.NewDecoder(r.Body).Decode(post)
 	if err != nil {
@@ -36,16 +42,52 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post.Created = time.Now()
-	post.User = "FetchedFromAuth"
+	post.User = encodedID
 	post.ID = primitive.NewObjectID()
 
+	postitCollection := postitDatabase.Collection("posts")
 	result, err := postitCollection.InsertOne(context.TODO(), post)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
 
-	resultResponseJSON(w, http.StatusBadRequest, result)
+	resultResponseJSON(w, http.StatusCreated, result)
+}
+
+func createUser(w http.ResponseWriter, r *http.Request) {
+	user := &model.User{}
+	err := json.NewDecoder(r.Body).Decode(user)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: errFailedDecoding.Error()})
+		return
+	}
+	user.ID = primitive.NewObjectID()
+
+	userCollection := postitDatabase.Collection("users")
+	result, err := userCollection.InsertOne(context.TODO(), user)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	resultResponseJSON(w, http.StatusCreated, result)
+}
+
+func fetchUser(w http.ResponseWriter, r *http.Request) {
+	user := model.User{}
+
+	encodedID := chi.URLParam(r, "encoded_id")
+	filter := bson.D{primitive.E{Key: "encoded_id", Value: encodedID}}
+
+	usersCollection := postitDatabase.Collection("users")
+	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	resultResponseJSON(w, http.StatusOK, user)
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +105,7 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 	options.SetSkip(begin)
 	options.SetSort(map[string]int{"_id": -1})
 
+	postitCollection := postitDatabase.Collection("posts")
 	cur, err := postitCollection.Find(context.TODO(), filter, options)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
@@ -97,6 +140,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	filter := bson.M{"_id": hex}
 
+	postitCollection := postitDatabase.Collection("posts")
 	result, err := postitCollection.DeleteOne(context.TODO(), filter)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})

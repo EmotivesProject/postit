@@ -8,7 +8,7 @@ import (
 
 type Post struct {
 	ID      primitive.ObjectID `bson:"_id" json:"id"`
-	User    string             `bson:"user json:"user"`
-	Message string             `bson:"message json:"message"`
-	Created time.Time          `bson:"created json:"created"`
+	User    string             `bson:"user" json:"user"`
+	Message string             `bson:"message" json:"message"`
+	Created time.Time          `bson:"created" json:"created"`
 }
