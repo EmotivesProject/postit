@@ -1,39 +1,43 @@
 version: '3'
 
 services:
-  postit:
+  api:
     build:
-      context: ../.
-      dockerfile: docker/Dockerfile.prod
+      context: ../../.
+      dockerfile: docker/postit/Dockerfile.prod
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../:/app
+      - ../../:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.emotives.net`)"
       - "traefik.http.routers.postit.tls=true"
       - "traefik.http.routers.postit.tls.certresolver=letsencrypt"
+      - "traefik.docker.network=traefik"
+    restart: unless-stopped
     networks:
       traefik:
-      postit:
-  postit-mongo:
+      default:
+  mongo:
     image: mongo:latest
     environment:
+      MONGO_INITDB_DATABASE: postit-db
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
-      - ../db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb_data:/data/db
+      - ../../db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
     networks:
-      postit:
+      default:
 
 volumes:
-  mongodb_data_container:
+  mongodb_data:
 
 networks:
-  postit:
+  default:
   traefik:
     external:
       name: traefik

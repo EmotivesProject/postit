@@ -1,22 +1,23 @@
 version: '3'
 
 services:
-  postit:
+  api:
     build:
-      context: ../.
-      dockerfile: docker/Dockerfile
+      context: ../../.
+      dockerfile: docker/postit/Dockerfile
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ../:/app
+      - ../../:/app
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"
       - "traefik.http.routers.postit.entrypoints=web"
       - "traefik.docker.network=traefik"
+    restart: unless-stopped
     networks:
       traefik:
-      postit:
-  postit-mongo:
+      default:
+  mongo:
     image: mongo:latest
     hostname: mongodb-server
     environment:
@@ -26,16 +27,17 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data_container:/data/db
-      - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb_data:/data/db
+      - ../../db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
     networks:
-      postit:
+      default:
 
 volumes:
-  mongodb_data_container:
+  mongodb_data:
 
 networks:
-  postit:
+  default:
   traefik:
     external:
       name: traefik

@@ -12,7 +12,7 @@ import (
 
 func Connect() *mongo.Collection {
 	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://admin:admin@postit-mongo:27017")
+	clientOptions := options.Client().ApplyURI("mongodb://admin:admin@mongo:27017")
 
 	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
 
