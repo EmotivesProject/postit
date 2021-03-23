@@ -93,12 +93,16 @@ func fetchUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
-	skip, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+	pagesParam := r.URL.Query().Get("page")
+	if pagesParam == "" {
+		pagesParam = "0"
+	}
+	skip, err := strconv.ParseInt(pagesParam, 10, 64)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
-	begin := 0 + (limit * skip)
+	begin := limit * skip
 
 	filter := bson.M{}
 	posts := []model.Post{}
@@ -133,7 +137,6 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
 		return
 	}
-	fmt.Println(postID)
 
 	hex, err := primitive.ObjectIDFromHex(postID)
 	if err != nil {
