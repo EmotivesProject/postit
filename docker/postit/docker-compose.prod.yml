@@ -8,6 +8,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ../../:/app
+    environment:
+      - BASE_HOST=http://
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.emotives.net`)"

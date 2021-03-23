@@ -2,11 +2,11 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"fmt"
+	"io/ioutil"
 	"net/http"
 	"postit/model"
-	"postit/pkg/auth"
 )
 
 type key string
@@ -22,17 +22,49 @@ var (
 func verifyJTW() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			client := &http.Client{}
+
+			authURL := "http://uacl/authorize"
+
 			header := r.Header.Get("authorization")
-			user, err := auth.Validate(header)
+
+			req, err := http.NewRequest("GET", authURL, nil)
 			if err != nil {
 				messageResponseJSON(w, http.StatusBadRequest, model.Message{
-					Message: errUnauthorised.Error(),
+					Message: err.Error(),
 				})
 				return
 			}
-			fmt.Println(user.Username)
-			ctx := context.WithValue(r.Context(), userID, user.Username)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			req.Header.Add("authorization", header)
+			resp, err := client.Do(req)
+			if err != nil {
+				messageResponseJSON(w, http.StatusBadRequest, model.Message{
+					Message: err.Error(),
+				})
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					messageResponseJSON(w, http.StatusBadRequest, model.Message{
+						Message: err.Error(),
+					})
+					return
+				}
+
+				var dat model.Response
+				var user model.User
+				_ = json.Unmarshal(bodyBytes, &dat)
+				body, _ := json.Marshal(dat.Result)
+				_ = json.Unmarshal(body, &user)
+				ctx := context.WithValue(r.Context(), userID, user.Username)
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+			messageResponseJSON(w, http.StatusBadRequest, model.Message{
+				Message: errUnauthorised.Error(),
+			})
 		})
 	}
 }
