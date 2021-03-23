@@ -15,7 +15,7 @@ func CreateRouter() chi.Router {
 
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/", createUser)
-			r.Route("/{encoded_id}", func(r chi.Router) {
+			r.Route("/{username}", func(r chi.Router) {
 				r.Get("/", fetchUser)
 			})
 		})

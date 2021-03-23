@@ -28,8 +28,8 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	encodedID := r.Context().Value(userID).(string)
-	if encodedID == "" {
+	username := r.Context().Value(userID).(string)
+	if username == "" {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "yo"})
 		return
 	}
@@ -42,7 +42,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post.Created = time.Now()
-	post.User = encodedID
+	post.User = username
 	post.ID = primitive.NewObjectID()
 
 	postitCollection := postitDatabase.Collection("posts")
@@ -79,8 +79,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 func fetchUser(w http.ResponseWriter, r *http.Request) {
 	user := model.User{}
 
-	encodedID := chi.URLParam(r, "encoded_id")
-	filter := bson.D{primitive.E{Key: "encoded_id", Value: encodedID}}
+	username := chi.URLParam(r, "username")
+	filter := bson.D{primitive.E{Key: "username", Value: username}}
 
 	usersCollection := postitDatabase.Collection("users")
 	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
