@@ -26,7 +26,7 @@ func verifyJTW() func(http.Handler) http.Handler {
 
 			authURL := "http://uacl/authorize"
 
-			header := r.Header.Get("authorization")
+			header := r.Header.Get("Authorization")
 
 			req, err := http.NewRequest("GET", authURL, nil)
 			if err != nil {
@@ -35,7 +35,7 @@ func verifyJTW() func(http.Handler) http.Handler {
 				})
 				return
 			}
-			req.Header.Add("authorization", header)
+			req.Header.Add("Authorization", header)
 			resp, err := client.Do(req)
 			if err != nil {
 				messageResponseJSON(w, http.StatusBadRequest, model.Message{
@@ -76,6 +76,11 @@ func SimpleMiddleware() func(http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", "*") // fixme please
 			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
+
+			if r.Method == "OPTIONS" {
+				return
+			}
+
 			next.ServeHTTP(w, r)
 		})
 	}
