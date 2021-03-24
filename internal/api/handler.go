@@ -34,15 +34,21 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := findUser(username)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
 	post := &model.Post{}
-	err := json.NewDecoder(r.Body).Decode(post)
+	err = json.NewDecoder(r.Body).Decode(post)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: errFailedDecoding.Error()})
 		return
 	}
 
 	post.Created = time.Now()
-	post.User = username
+	post.User = user.ID
 	post.ID = primitive.NewObjectID()
 
 	postitCollection := postitDatabase.Collection("posts")
@@ -76,14 +82,18 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	resultResponseJSON(w, http.StatusCreated, result)
 }
 
-func fetchUser(w http.ResponseWriter, r *http.Request) {
+func findUser(username string) (model.User, error) {
 	user := model.User{}
-
-	username := chi.URLParam(r, "username")
 	filter := bson.D{primitive.E{Key: "username", Value: username}}
 
 	usersCollection := postitDatabase.Collection("users")
 	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
+	return user, err
+}
+
+func fetchUser(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	user, err := findUser(username)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
