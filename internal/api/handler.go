@@ -50,9 +50,117 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	post.Created = time.Now()
 	post.User = user.ID
 	post.ID = primitive.NewObjectID()
+	post.Active = true
 
 	postitCollection := postitDatabase.Collection("posts")
 	result, err := postitCollection.InsertOne(context.TODO(), post)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	resultResponseJSON(w, http.StatusCreated, result)
+}
+
+func createComment(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(userID).(string)
+	if username == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "yo"})
+		return
+	}
+
+	user, err := findUser(username)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	postID := chi.URLParam(r, "post_id")
+	if postID == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
+		return
+	}
+	post, err := findPostById(postID)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	comment := &model.Comment{}
+	err = json.NewDecoder(r.Body).Decode(comment)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: errFailedDecoding.Error()})
+		return
+	}
+
+	comment.ID = primitive.NewObjectID()
+	comment.Post = post.ID
+	comment.User = user.ID
+	comment.Created = time.Now()
+	comment.Active = true
+
+	commentsCollection := postitDatabase.Collection("comments")
+	result, err := commentsCollection.InsertOne(context.TODO(), comment)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	post.UserComments = append(post.UserComments, comment.ID)
+	postitCollection := postitDatabase.Collection("posts")
+	_, err = postitCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	resultResponseJSON(w, http.StatusCreated, result)
+}
+
+func createLike(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(userID).(string)
+	if username == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "yo"})
+		return
+	}
+
+	user, err := findUser(username)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	postID := chi.URLParam(r, "post_id")
+	if postID == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
+		return
+	}
+	post, err := findPostById(postID)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	like := &model.Like{
+		ID:      primitive.NewObjectID(),
+		Post:    post.ID,
+		User:    user.ID,
+		Created: time.Now(),
+		Active:  true,
+	}
+
+	likeCollection := postitDatabase.Collection("likes")
+	result, err := likeCollection.InsertOne(context.TODO(), like)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	post.Likes = post.Likes + 1
+
+	post.UserLikes = append(post.UserLikes, like.ID)
+	postitCollection := postitDatabase.Collection("posts")
+	_, err = postitCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
@@ -155,12 +263,92 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	filter := bson.M{"_id": hex}
 
-	postitCollection := postitDatabase.Collection("posts")
-	result, err := postitCollection.DeleteOne(context.TODO(), filter)
+	var post model.Post
+	postsCollection := postitDatabase.Collection("posts")
+	err = postsCollection.FindOne(context.TODO(), filter).Decode(&post)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
 
-	resultResponseJSON(w, http.StatusOK, result)
+	post.Active = false
+	_, err = postsCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	resultResponseJSON(w, http.StatusOK, post)
+}
+
+func deleteComment(w http.ResponseWriter, r *http.Request) {
+	commentID := chi.URLParam(r, "comment_id")
+	if commentID == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
+		return
+	}
+	hex, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	filter := bson.M{"_id": hex}
+
+	var comment model.Comment
+	commentsCollection := postitDatabase.Collection("comments")
+	err = commentsCollection.FindOne(context.TODO(), filter).Decode(&comment)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	comment.Active = false
+	_, err = commentsCollection.ReplaceOne(context.TODO(), bson.M{"_id": comment.ID}, comment)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	resultResponseJSON(w, http.StatusOK, comment)
+}
+
+func deleteLike(w http.ResponseWriter, r *http.Request) {
+	likeID := chi.URLParam(r, "like_id")
+	if likeID == "" {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
+		return
+	}
+	hex, err := primitive.ObjectIDFromHex(likeID)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	filter := bson.M{"_id": hex}
+
+	var like model.Like
+	likesCollection := postitDatabase.Collection("likes")
+	err = likesCollection.FindOne(context.TODO(), filter).Decode(&like)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+
+	like.Active = false
+	_, err = likesCollection.ReplaceOne(context.TODO(), bson.M{"_id": like.ID}, like)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	resultResponseJSON(w, http.StatusOK, like)
+}
+
+func findPostById(postID string) (model.Post, error) {
+	var post model.Post
+	hex, err := primitive.ObjectIDFromHex(postID)
+	if err != nil {
+		return post, err
+	}
+	filter := bson.M{"_id": hex}
+
+	postsCollection := postitDatabase.Collection("posts")
+	err = postsCollection.FindOne(context.TODO(), filter).Decode(&post)
+	return post, err
 }

@@ -26,6 +26,20 @@ func CreateRouter() chi.Router {
 
 			r.Route("/{post_id}", func(r chi.Router) {
 				r.Delete("/", deletePost)
+
+				r.Route("/like", func(r chi.Router) {
+					r.Post("/", createLike)
+					r.Route("/{like_id}", func(r chi.Router) {
+						r.Delete("/", deleteLike)
+					})
+				})
+
+				r.Route("/comment", func(r chi.Router) {
+					r.Post("/", createComment)
+					r.Route("/{comment_id}", func(r chi.Router) {
+						r.Delete("/", deleteComment)
+					})
+				})
 			})
 		})
 

@@ -14,4 +14,5 @@ type Post struct {
 	UserLikes    []primitive.ObjectID `bson:"user_likes" json:"user_likes"`
 	UserComments []primitive.ObjectID `bson:"user_comments" json:"user_comments"`
 	Created      time.Time            `bson:"created" json:"created"`
+	Active       bool                 `bson:"active" json:"active"`
 }
