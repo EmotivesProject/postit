@@ -8,12 +8,13 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"postit/model"
-	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -141,32 +142,44 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	like := &model.Like{
-		ID:      primitive.NewObjectID(),
-		Post:    post.ID,
-		User:    user.ID,
-		Created: time.Now(),
-		Active:  true,
-	}
-
+	var alreadyLiked model.Like
 	likeCollection := postitDatabase.Collection("likes")
-	result, err := likeCollection.InsertOne(context.TODO(), like)
+	err = likeCollection.FindOne(context.TODO(), bson.M{"post": post.ID, "user": user.ID}).Decode(&alreadyLiked)
 	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
+		if err == mongo.ErrNoDocuments {
+			like := &model.Like{
+				ID:      primitive.NewObjectID(),
+				Post:    post.ID,
+				User:    user.ID,
+				Created: time.Now(),
+				Active:  true,
+			}
+
+			result, err := likeCollection.InsertOne(context.TODO(), like)
+			if err != nil {
+				messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+				return
+			}
+
+			post.Likes = post.Likes + 1
+
+			post.UserLikes = append(post.UserLikes, like.ID)
+			postitCollection := postitDatabase.Collection("posts")
+			_, err = postitCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
+			if err != nil {
+				messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+				return
+			}
+
+			resultResponseJSON(w, http.StatusCreated, result)
+			return
+		} else {
+			messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+			return
+		}
 	}
 
-	post.Likes = post.Likes + 1
-
-	post.UserLikes = append(post.UserLikes, like.ID)
-	postitCollection := postitDatabase.Collection("posts")
-	_, err = postitCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-
-	resultResponseJSON(w, http.StatusCreated, result)
+	messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "Already liked"})
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
@@ -211,42 +224,63 @@ func fetchUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
-	pagesParam := r.URL.Query().Get("page")
-	if pagesParam == "" {
-		pagesParam = "0"
-	}
-	skip, err := strconv.ParseInt(pagesParam, 10, 64)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-	begin := limit * skip
+	userPipeline := `
+	[
+  { "$lookup": {
+    "from": "likes",
+    "let": { "user_likes": "$user_likes" },
+    "pipeline": [
+       { "$match": { "$expr": { "$in": [ "$_id", "$$user_likes" ] } } },
+       { "$lookup": {
+         "from": "users",
+         "let": { "user": "$user" },
+         "pipeline": [
+           { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+         ],
+         "as": "user"
+       }}
+     ],
+     "as": "user_likes"
+  }},
+  { "$lookup": {
+    "from": "comments",
+    "let": { "user_comments": "$user_comments" },
+    "pipeline": [
+       { "$match": { "$expr": { "$in": [ "$_id", "$$user_comments" ] } } },
+       { "$lookup": {
+         "from": "users",
+         "let": { "user": "$user" },
+         "pipeline": [
+           { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+         ],
+         "as": "user"
+       }}
+     ],
+     "as": "user_comments"
+  }},
+  { "$lookup": {
+    "from": "users",
+    "let": { "user": "$user" },
+    "pipeline": [
+       { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+     ],
+     "as": "user"
+  }}
+ ]`
 
-	filter := bson.M{}
-	posts := []model.Post{}
-	options := options.Find()
-	options.SetLimit(limit)
-	options.SetSkip(begin)
-	options.SetSort(map[string]int{"_id": -1})
+	userPipelineMongo := MongoPipeline(userPipeline)
 
-	postitCollection := postitDatabase.Collection("posts")
-	cur, err := postitCollection.Find(context.TODO(), filter, options)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
+	options := options.Aggregate()
+
+	collection := postitDatabase.Collection("posts")
+	cur, _ := collection.Aggregate(context.Background(), userPipelineMongo, options)
+
+	var showsWithInfo []bson.M
+	if err := cur.All(context.TODO(), &showsWithInfo); err != nil {
+		panic(err)
 	}
 
-	for cur.Next(context.TODO()) {
-		p := model.Post{}
-		err := cur.Decode(&p)
-		if err != nil {
-			continue
-		}
-		posts = append(posts, p)
-	}
-	cur.Close(context.TODO())
-
-	resultResponseJSON(w, http.StatusOK, posts)
+	resultResponseJSON(w, http.StatusOK, showsWithInfo)
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
@@ -351,4 +385,19 @@ func findPostById(postID string) (model.Post, error) {
 	postsCollection := postitDatabase.Collection("posts")
 	err = postsCollection.FindOne(context.TODO(), filter).Decode(&post)
 	return post, err
+}
+
+// Thanks https://github.com/simagix/mongo-go-examples
+func MongoPipeline(str string) mongo.Pipeline {
+	var pipeline = []bson.D{}
+	str = strings.TrimSpace(str)
+	if strings.Index(str, "[") != 0 {
+		var doc bson.D
+		bson.UnmarshalExtJSON([]byte(str), false, &doc)
+		pipeline = append(pipeline, doc)
+	} else {
+		bson.UnmarshalExtJSON([]byte(str), false, &pipeline)
+	}
+	fmt.Println(pipeline)
+	return pipeline
 }
