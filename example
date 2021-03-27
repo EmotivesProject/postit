@@ -39,5 +39,6 @@ db.posts.aggregate([
      ],
      "as": "user_comments"
   }},
-  { "$skip": 5}
+  { "$skip": 0},
+  { "$limit": 5}
  ]).pretty()

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"postit/model"
+	"strconv"
 	"strings"
 	"time"
 
@@ -224,8 +225,19 @@ func fetchUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
-	userPipeline := `
-	[
+	pagesParam := r.URL.Query().Get("page")
+	if pagesParam == "" {
+		pagesParam = "0"
+	}
+	skip, err := strconv.ParseInt(pagesParam, 10, 64)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	begin := limit * skip
+
+	userPipeline := fmt.Sprintf(`
+[
   { "$lookup": {
     "from": "likes",
     "let": { "user_likes": "$user_likes" },
@@ -243,6 +255,14 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
      "as": "user_likes"
   }},
   { "$lookup": {
+    "from": "users",
+    "let": { "user": "$user" },
+    "pipeline": [
+       { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+     ],
+     "as": "user"
+  }},
+  { "$lookup": {
     "from": "comments",
     "let": { "user_comments": "$user_comments" },
     "pipeline": [
@@ -258,15 +278,10 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
      ],
      "as": "user_comments"
   }},
-  { "$lookup": {
-    "from": "users",
-    "let": { "user": "$user" },
-    "pipeline": [
-       { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
-     ],
-     "as": "user"
-  }}
- ]`
+  { "$skip": %d},
+  { "$limit": 5},
+  { "$sort": { "_id": -1 }}
+ ]`, begin)
 
 	userPipelineMongo := MongoPipeline(userPipeline)
 
@@ -398,6 +413,5 @@ func MongoPipeline(str string) mongo.Pipeline {
 	} else {
 		bson.UnmarshalExtJSON([]byte(str), false, &pipeline)
 	}
-	fmt.Println(pipeline)
 	return pipeline
 }
