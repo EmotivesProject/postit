@@ -96,7 +96,6 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment.ID = primitive.NewObjectID()
-	comment.Post = post.ID
 	comment.User = user.ID
 	comment.Created = time.Now()
 	comment.Active = true
@@ -150,7 +149,6 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		if err == mongo.ErrNoDocuments {
 			like := &model.Like{
 				ID:      primitive.NewObjectID(),
-				Post:    post.ID,
 				User:    user.ID,
 				Created: time.Now(),
 				Active:  true,
