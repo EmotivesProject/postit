@@ -78,3 +78,15 @@ func UpdatePost(post *model.Post, mongoDB *mongo.Database) error {
 	_, err := postCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
 	return err
 }
+
+func UpdateComment(comment *model.Comment, mongoDB *mongo.Database) error {
+	commentCollection := mongoDB.Collection(CommentCollection)
+	_, err := commentCollection.ReplaceOne(context.TODO(), bson.M{"_id": comment.ID}, comment)
+	return err
+}
+
+func UpdateLike(like *model.Like, mongoDB *mongo.Database) error {
+	likeCollection := mongoDB.Collection(LikeCollection)
+	_, err := likeCollection.ReplaceOne(context.TODO(), bson.M{"_id": like.ID}, like)
+	return err
+}

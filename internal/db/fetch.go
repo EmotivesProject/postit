@@ -24,9 +24,38 @@ func FindPostById(postID string, mongoDB *mongo.Database) (model.Post, error) {
 	if err != nil {
 		return post, err
 	}
-	filter := bson.M{"_id": hex}
+	result := findByID(hex, PostCollection, mongoDB)
+	err = result.Decode(&post)
 
-	postsCollection := mongoDB.Collection(PostCollection)
-	err = postsCollection.FindOne(context.TODO(), filter).Decode(&post)
 	return post, err
+}
+
+func FindCommentById(commentID string, mongoDB *mongo.Database) (model.Comment, error) {
+	var comment model.Comment
+	hex, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		return comment, err
+	}
+	result := findByID(hex, PostCollection, mongoDB)
+	err = result.Decode(&comment)
+
+	return comment, err
+}
+
+func FindLikeById(likeID string, mongoDB *mongo.Database) (model.Like, error) {
+	var like model.Like
+	hex, err := primitive.ObjectIDFromHex(likeID)
+	if err != nil {
+		return like, err
+	}
+	result := findByID(hex, PostCollection, mongoDB)
+	err = result.Decode(&like)
+
+	return like, err
+}
+
+func findByID(id primitive.ObjectID, collection string, mongoDB *mongo.Database) *mongo.SingleResult {
+	filter := bson.M{"_id": id}
+	postsCollection := mongoDB.Collection(PostCollection)
+	return postsCollection.FindOne(context.TODO(), filter)
 }

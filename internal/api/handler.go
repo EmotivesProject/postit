@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"postit/internal/db"
@@ -9,8 +8,6 @@ import (
 	"postit/pkg/postit_messages"
 
 	"github.com/go-chi/chi"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -173,28 +170,14 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, postParam)
-	if postID == "" {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
-		return
-	}
-
-	hex, err := primitive.ObjectIDFromHex(postID)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-	filter := bson.M{"_id": hex}
-
-	var post model.Post
-	postsCollection := postitDatabase.Collection("posts")
-	err = postsCollection.FindOne(context.TODO(), filter).Decode(&post)
+	post, err := db.FindPostById(postID, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
 
 	post.Active = false
-	_, err = postsCollection.ReplaceOne(context.TODO(), bson.M{"_id": post.ID}, post)
+	err = db.UpdatePost(&post, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
@@ -202,29 +185,17 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	resultResponseJSON(w, http.StatusOK, post)
 }
 
+// Below functions should also need to update the relevant posts
 func deleteComment(w http.ResponseWriter, r *http.Request) {
 	commentID := chi.URLParam(r, "comment_id")
-	if commentID == "" {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
-		return
-	}
-	hex, err := primitive.ObjectIDFromHex(commentID)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-	filter := bson.M{"_id": hex}
-
-	var comment model.Comment
-	commentsCollection := postitDatabase.Collection("comments")
-	err = commentsCollection.FindOne(context.TODO(), filter).Decode(&comment)
+	comment, err := db.FindCommentById(commentID, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
 
 	comment.Active = false
-	_, err = commentsCollection.ReplaceOne(context.TODO(), bson.M{"_id": comment.ID}, comment)
+	err = db.UpdateComment(&comment, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
@@ -234,23 +205,14 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
 	likeID := chi.URLParam(r, "like_id")
-	likeHexID, err := primitive.ObjectIDFromHex(likeID)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-	filter := bson.M{"_id": likeHexID}
-
-	var like model.Like
-	likesCollection := postitDatabase.Collection("likes")
-	err = likesCollection.FindOne(context.TODO(), filter).Decode(&like)
+	like, err := db.FindLikeById(likeID, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
 	}
 
 	like.Active = false
-	_, err = likesCollection.ReplaceOne(context.TODO(), bson.M{"_id": like.ID}, like)
+	err = db.UpdateLike(&like, postitDatabase)
 	if err != nil {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 		return
