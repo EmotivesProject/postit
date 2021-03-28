@@ -375,6 +375,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("YO")
 	likeID := chi.URLParam(r, "like_id")
 	if likeID == "" {
 		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: "not specified"})
