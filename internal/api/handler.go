@@ -213,6 +213,17 @@ func findUser(username string) (model.User, error) {
 	return user, err
 }
 
+func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(userID)
+	usernameString := fmt.Sprintf("%v", username)
+	user, err := findUser(usernameString)
+	if err != nil {
+		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		return
+	}
+	resultResponseJSON(w, http.StatusOK, user)
+}
+
 func fetchUser(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 	user, err := findUser(username)
@@ -242,12 +253,12 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
     "from": "likes",
     "let": { "user_likes": "$user_likes" },
     "pipeline": [
-       { "$match": { "$expr": { "$in": [ "$_id", "$$user_likes" ] } } },
+       { "$match": { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_likes",[]]} ] } } },
        { "$lookup": {
          "from": "users",
          "let": { "user": "$user" },
          "pipeline": [
-           { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+           { "$match": { "$expr": { "$eq": [ "$_id", {"$ifNull": ["$$user",[]]} ] } } }
          ],
          "as": "user"
        }}
@@ -258,7 +269,7 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
     "from": "users",
     "let": { "user": "$user" },
     "pipeline": [
-       { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+       { "$match": { "$expr": { "$eq": [ "$_id", {"$ifNull": ["$$user",[]]} ] } } }
      ],
      "as": "user"
   }},
@@ -266,12 +277,12 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
     "from": "comments",
     "let": { "user_comments": "$user_comments" },
     "pipeline": [
-       { "$match": { "$expr": { "$in": [ "$_id", "$$user_comments" ] } } },
+       { "$match": { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_comments",[]]} ] } } },
        { "$lookup": {
          "from": "users",
          "let": { "user": "$user" },
          "pipeline": [
-           { "$match": { "$expr": { "$eq": [ "$_id", "$$user" ] } } }
+           { "$match": { "$expr": { "$eq": [ "$_id", {"$ifNull": ["$$user",[]]} ] } } }
          ],
          "as": "user"
        }}
@@ -288,7 +299,11 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 	options := options.Aggregate()
 
 	collection := postitDatabase.Collection("posts")
-	cur, _ := collection.Aggregate(context.Background(), userPipelineMongo, options)
+	cur, err := collection.Aggregate(context.Background(), userPipelineMongo, options)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 	var showsWithInfo []bson.M
 	if err := cur.All(context.TODO(), &showsWithInfo); err != nil {
@@ -413,5 +428,6 @@ func MongoPipeline(str string) mongo.Pipeline {
 	} else {
 		bson.UnmarshalExtJSON([]byte(str), false, &pipeline)
 	}
+	fmt.Println(pipeline)
 	return pipeline
 }

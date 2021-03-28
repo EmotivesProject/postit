@@ -15,6 +15,7 @@ func CreateRouter() chi.Router {
 
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/", createUser)
+			r.With(verifyJTW()).Get("/", fetchUserFromAuth)
 			r.Route("/{username}", func(r chi.Router) {
 				r.Get("/", fetchUser)
 			})
