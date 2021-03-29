@@ -71,6 +71,5 @@ func mongoPipeline(str string) mongo.Pipeline {
 	} else {
 		bson.UnmarshalExtJSON([]byte(str), false, &pipeline)
 	}
-	fmt.Println(pipeline)
 	return pipeline
 }

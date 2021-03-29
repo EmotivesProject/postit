@@ -98,26 +98,28 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	// Check if the user has already liked the post
 	// Get all the likes on the post and see if the user is in there.
 	// Set it active to true if it's false or error if already liked
-	likesOnPost, err := db.FindByLikeIDS(post.UserLikes, postitDatabase)
-	if err != nil {
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-	fmt.Println(likesOnPost)
-	for _, rangedLike := range likesOnPost {
-		if rangedLike.User == user.ID {
-			if rangedLike.Active {
-				messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: postit_messages.ErrAlreadyLiked.Error()})
-				return
-			}
-			rangedLike.Active = true
-			err = db.UpdateLike(&rangedLike, postitDatabase)
-			if err != nil {
-				messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-				return
-			}
-			resultResponseJSON(w, http.StatusCreated, rangedLike)
+	if post.UserLikes != nil {
+		likesOnPost, err := db.FindByLikeIDS(post.UserLikes, postitDatabase)
+		if err != nil {
+			messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
 			return
+		}
+
+		for _, rangedLike := range likesOnPost {
+			if rangedLike.User == user.ID {
+				if rangedLike.Active {
+					messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: postit_messages.ErrAlreadyLiked.Error()})
+					return
+				}
+				rangedLike.Active = true
+				err = db.UpdateLike(&rangedLike, postitDatabase)
+				if err != nil {
+					messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+					return
+				}
+				resultResponseJSON(w, http.StatusCreated, rangedLike)
+				return
+			}
 		}
 	}
 

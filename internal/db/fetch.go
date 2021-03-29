@@ -36,7 +36,7 @@ func FindCommentById(commentID string, mongoDB *mongo.Database) (model.Comment, 
 	if err != nil {
 		return comment, err
 	}
-	result := findByID(hex, PostCollection, mongoDB)
+	result := findByID(hex, CommentCollection, mongoDB)
 	err = result.Decode(&comment)
 
 	return comment, err
@@ -48,7 +48,7 @@ func FindLikeById(likeID string, mongoDB *mongo.Database) (model.Like, error) {
 	if err != nil {
 		return like, err
 	}
-	result := findByID(hex, PostCollection, mongoDB)
+	result := findByID(hex, LikeCollection, mongoDB)
 	err = result.Decode(&like)
 
 	return like, err
@@ -56,8 +56,8 @@ func FindLikeById(likeID string, mongoDB *mongo.Database) (model.Like, error) {
 
 func findByID(id primitive.ObjectID, collection string, mongoDB *mongo.Database) *mongo.SingleResult {
 	filter := bson.M{"_id": id}
-	postsCollection := mongoDB.Collection(PostCollection)
-	return postsCollection.FindOne(context.TODO(), filter)
+	databaseCollection := mongoDB.Collection(collection)
+	return databaseCollection.FindOne(context.TODO(), filter)
 }
 
 func FindByLikeIDS(UserLikes []primitive.ObjectID, mongoDB *mongo.Database) ([]model.Like, error) {
