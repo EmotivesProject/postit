@@ -15,7 +15,7 @@ func FindPostPipeline(begin int64) mongo.Pipeline {
     "from": "likes",
     "let": { "user_likes": "$user_likes" },
     "pipeline": [
-       { "$match": { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_likes",[]]} ] } } },
+       { "$match": { "$and": [ { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_likes",[]]} ] } }, { "active": true } ] } },
        { "$lookup": {
          "from": "users",
          "let": { "user": "$user" },
@@ -39,7 +39,7 @@ func FindPostPipeline(begin int64) mongo.Pipeline {
     "from": "comments",
     "let": { "user_comments": "$user_comments" },
     "pipeline": [
-       { "$match": { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_comments",[]]} ] } } },
+       { "$match": { "$and": [ { "$expr": { "$in": [ "$_id", {"$ifNull": ["$$user_comments",[]]} ] } }, { "active": true } ] } },
        { "$lookup": {
          "from": "users",
          "let": { "user": "$user" },
@@ -51,6 +51,7 @@ func FindPostPipeline(begin int64) mongo.Pipeline {
      ],
      "as": "user_comments"
   }},
+  { "$match":  { "active": true } },
   { "$skip": %d},
   { "$limit": 5},
   { "$sort": { "_id": -1 }}

@@ -59,3 +59,17 @@ func findByID(id primitive.ObjectID, collection string, mongoDB *mongo.Database)
 	postsCollection := mongoDB.Collection(PostCollection)
 	return postsCollection.FindOne(context.TODO(), filter)
 }
+
+func FindByLikeIDS(UserLikes []primitive.ObjectID, mongoDB *mongo.Database) ([]model.Like, error) {
+	var likes []model.Like
+	query := bson.M{"_id": bson.M{"$in": UserLikes}}
+	collection := mongoDB.Collection(LikeCollection)
+
+	cur, err := collection.Find(context.TODO(), query)
+	if err != nil {
+		return likes, err
+	}
+
+	err = cur.All(context.TODO(), &likes)
+	return likes, err
+}
