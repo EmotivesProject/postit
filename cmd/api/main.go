@@ -5,11 +5,17 @@ import (
 	"net/http"
 	"os"
 	"postit/internal/api"
+	"postit/internal/db"
+	"postit/internal/logger"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	logger.InitLogger()
+
+	db.Connect()
+
 	router := api.CreateRouter()
 
 	err := godotenv.Load()

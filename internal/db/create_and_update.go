@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"postit/internal/postit_messages"
 	"postit/model"
-	"postit/pkg/postit_messages"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"

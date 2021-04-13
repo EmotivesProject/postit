@@ -2,15 +2,19 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"postit/internal/logger"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect() *mongo.Database {
+var (
+	db *mongo.Database
+)
+
+func Connect() {
 	// Set client options
 	clientOptions := options.Client().ApplyURI("mongodb://admin:admin@mongo:27017")
 
@@ -26,7 +30,11 @@ func Connect() *mongo.Database {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Connected to MongoDB!")
+	logger.Info("Connected to MongoDB!")
 
-	return client.Database("postit-db")
+	db = client.Database("postit-db")
+}
+
+func GetDatabase() *mongo.Database {
+	return db
 }
