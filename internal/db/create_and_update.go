@@ -13,11 +13,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func CreatePost(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Database) (*mongo.InsertOneResult, error) {
+func CreatePost(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Database) (*mongo.InsertOneResult, *model.Post, error) {
 	post := &model.Post{}
 	err := json.NewDecoder(body).Decode(post)
 	if err != nil {
-		return &mongo.InsertOneResult{}, postit_messages.ErrFailedDecoding
+		return &mongo.InsertOneResult{}, post, postit_messages.ErrFailedDecoding
 	}
 
 	post.Created = time.Now()
@@ -25,7 +25,8 @@ func CreatePost(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Da
 	post.ID = primitive.NewObjectID()
 	post.Active = true
 
-	return insetIntoCollection(PostCollection, post, mongoDB)
+	mongoResult, err := insetIntoCollection(PostCollection, post, mongoDB)
+	return mongoResult, post, err
 }
 
 func CreateComment(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Database) (*model.Comment, error) {

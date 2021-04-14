@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"postit/internal/db"
+	"postit/internal/event"
 	"postit/internal/logger"
 	"postit/internal/postit_messages"
 	"postit/model"
@@ -31,7 +32,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := db.CreatePost(
+	result, post, err := db.CreatePost(
 		r.Body,
 		user.ID,
 		postitDatabase,
@@ -43,6 +44,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Successfully created post with for %s", username)
+	event.SendPostEvent(username, post)
 
 	resultResponseJSON(w, http.StatusCreated, result)
 }
