@@ -6,13 +6,14 @@ import (
 	"os"
 	"postit/internal/api"
 	"postit/internal/db"
-	"postit/internal/logger"
+
+	"github.com/TomBowyerResearchProject/common/logger"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	logger.InitLogger()
+	logger.InitLogger("postit")
 
 	db.Connect()
 

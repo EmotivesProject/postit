@@ -3,8 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"postit/internal/logger"
 	"postit/model"
+
+	"github.com/TomBowyerResearchProject/common/logger"
 )
 
 func resultResponseJSON(w http.ResponseWriter, status int, result interface{}) {

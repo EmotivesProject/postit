@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"postit/internal/event"
-	"postit/internal/logger"
 	"postit/internal/postit_messages"
 	"postit/model"
+
+	"github.com/TomBowyerResearchProject/common/logger"
 
 	"github.com/go-chi/chi"
 )

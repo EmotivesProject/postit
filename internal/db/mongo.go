@@ -3,8 +3,9 @@ package db
 import (
 	"context"
 	"log"
-	"postit/internal/logger"
 	"time"
+
+	"github.com/TomBowyerResearchProject/common/logger"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"postit/internal/logger"
 	"postit/model"
+
+	"github.com/TomBowyerResearchProject/common/logger"
 )
 
 func SendPostEvent(username, status string, post *model.Post) {
