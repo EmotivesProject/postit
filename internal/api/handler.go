@@ -44,7 +44,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Successfully created post with for %s", username)
-	event.SendPostEvent(username, post)
+	event.SendPostEvent(username, model.StatusCreated, post)
 
 	resultResponseJSON(w, http.StatusCreated, result)
 }
@@ -90,6 +90,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Created comment for %s", username)
+	event.SendCommentEvent(username, model.StatusCreated, comment)
 
 	resultResponseJSON(w, http.StatusCreated, comment)
 }
@@ -167,38 +168,8 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Created like for %s", username)
+	event.SendLikeEvent(username, model.StatusCreated, like)
 	resultResponseJSON(w, http.StatusCreated, like)
-}
-
-func createUser(w http.ResponseWriter, r *http.Request) {
-	postitDatabase := db.GetDatabase()
-	user, err := db.CreateUser(
-		r.Body,
-		postitDatabase,
-	)
-	if err != nil {
-		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-
-	logger.Infof("Created user %s", user)
-	resultResponseJSON(w, http.StatusCreated, user)
-}
-
-func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
-	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID)
-	usernameString := fmt.Sprintf("%v", username)
-	user, err := db.FindUser(usernameString, postitDatabase)
-
-	if err != nil {
-		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
-		return
-	}
-
-	resultResponseJSON(w, http.StatusOK, user)
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
@@ -223,6 +194,8 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
+	username := r.Context().Value(userID)
+	usernameString := fmt.Sprintf("%v", username)
 	postID := chi.URLParam(r, postParam)
 	post, err := db.FindPostById(postID, postitDatabase)
 	if err != nil {
@@ -239,11 +212,13 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Infof("Successfully deleted post %s", postID)
+	event.SendPostEvent(usernameString, model.StatusDeleted, &post)
 	resultResponseJSON(w, http.StatusOK, post)
 }
 
-// Below functions should also need to update the relevant posts
 func deleteComment(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(userID)
+	usernameString := fmt.Sprintf("%v", username)
 	postitDatabase := db.GetDatabase()
 	commentID := chi.URLParam(r, "comment_id")
 	comment, err := db.FindCommentById(commentID, postitDatabase)
@@ -261,10 +236,13 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Infof("Successfully deleted comment %s", commentID)
+	event.SendCommentEvent(usernameString, model.StatusDeleted, &comment)
 	resultResponseJSON(w, http.StatusOK, comment)
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(userID)
+	usernameString := fmt.Sprintf("%v", username)
 	postitDatabase := db.GetDatabase()
 	likeID := chi.URLParam(r, "like_id")
 	like, err := db.FindLikeById(likeID, postitDatabase)
@@ -282,5 +260,6 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Infof("Successfully deleted like %s", likeID)
+	event.SendLikeEvent(usernameString, model.StatusDeleted, &like)
 	resultResponseJSON(w, http.StatusOK, like)
 }

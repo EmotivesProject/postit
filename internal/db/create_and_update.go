@@ -45,16 +45,14 @@ func CreateComment(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo
 	return comment, err
 }
 
-func CreateUser(body io.ReadCloser, mongoDB *mongo.Database) (*model.User, error) {
-	user := &model.User{}
-	err := json.NewDecoder(body).Decode(user)
-	if err != nil {
-		return user, err
+func CreateUser(username string, mongoDB *mongo.Database) (*model.User, error) {
+	user := model.User{
+		Username: username,
 	}
 	user.ID = primitive.NewObjectID()
 
-	_, err = insetIntoCollection(UserCollection, user, mongoDB)
-	return user, err
+	_, err := insetIntoCollection(UserCollection, user, mongoDB)
+	return &user, err
 }
 
 func CreateLike(userID primitive.ObjectID, mongoDB *mongo.Database) (*model.Like, error) {

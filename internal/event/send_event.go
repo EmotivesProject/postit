@@ -9,11 +9,41 @@ import (
 	"postit/model"
 )
 
-func SendPostEvent(username string, post *model.Post) {
+func SendPostEvent(username, status string, post *model.Post) {
+	eventData := model.EventData{
+		Data:   post,
+		Status: status,
+	}
 	event := model.Event{
 		Username:      username,
-		CustomerEvent: "post",
-		Data:          post,
+		CustomerEvent: model.EventPost,
+		Data:          eventData,
+	}
+	sendEvent(event)
+}
+
+func SendLikeEvent(username, status string, like *model.Like) {
+	eventData := model.EventData{
+		Data:   like,
+		Status: status,
+	}
+	event := model.Event{
+		Username:      username,
+		CustomerEvent: model.EventLike,
+		Data:          eventData,
+	}
+	sendEvent(event)
+}
+
+func SendCommentEvent(username, status string, comment *model.Comment) {
+	eventData := model.EventData{
+		Data:   comment,
+		Status: status,
+	}
+	event := model.Event{
+		Username:      username,
+		CustomerEvent: model.EventComment,
+		Data:          eventData,
 	}
 	sendEvent(event)
 }

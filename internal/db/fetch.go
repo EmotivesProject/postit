@@ -15,6 +15,12 @@ func FindUser(username string, mongoDB *mongo.Database) (model.User, error) {
 
 	usersCollection := mongoDB.Collection(UserCollection)
 	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
+
+	// Create the user
+	if err == mongo.ErrNoDocuments {
+		userdef, err := CreateUser(username, mongoDB)
+		return *userdef, err
+	}
 	return user, err
 }
 
