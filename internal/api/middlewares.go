@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"postit/model"
+
+	"github.com/TomBowyerResearchProject/common/response"
 )
 
 type key string
@@ -30,7 +32,7 @@ func verifyJTW() func(http.Handler) http.Handler {
 
 			req, err := http.NewRequest("GET", authURL, nil)
 			if err != nil {
-				messageResponseJSON(w, http.StatusBadRequest, model.Message{
+				response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{
 					Message: err.Error(),
 				})
 				return
@@ -38,7 +40,7 @@ func verifyJTW() func(http.Handler) http.Handler {
 			req.Header.Add("Authorization", header)
 			resp, err := client.Do(req)
 			if err != nil {
-				messageResponseJSON(w, http.StatusBadRequest, model.Message{
+				response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{
 					Message: err.Error(),
 				})
 				return
@@ -47,13 +49,13 @@ func verifyJTW() func(http.Handler) http.Handler {
 			if resp.StatusCode == http.StatusOK {
 				bodyBytes, err := ioutil.ReadAll(resp.Body)
 				if err != nil {
-					messageResponseJSON(w, http.StatusBadRequest, model.Message{
+					response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{
 						Message: err.Error(),
 					})
 					return
 				}
 
-				var dat model.Response
+				var dat response.Response
 				var user model.User
 				_ = json.Unmarshal(bodyBytes, &dat)
 				body, _ := json.Marshal(dat.Result)
@@ -62,7 +64,7 @@ func verifyJTW() func(http.Handler) http.Handler {
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
-			messageResponseJSON(w, http.StatusBadRequest, model.Message{
+			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{
 				Message: errUnauthorised.Error(),
 			})
 		})

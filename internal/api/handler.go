@@ -9,6 +9,7 @@ import (
 	"postit/model"
 
 	"github.com/TomBowyerResearchProject/common/logger"
+	"github.com/TomBowyerResearchProject/common/response"
 
 	"github.com/go-chi/chi"
 )
@@ -20,7 +21,7 @@ var (
 )
 
 func healthz(w http.ResponseWriter, r *http.Request) {
-	messageResponseJSON(w, http.StatusOK, model.Message{Message: msgHealthOK})
+	response.MessageResponseJSON(w, http.StatusOK, response.Message{Message: msgHealthOK})
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -40,14 +41,14 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
 	logger.Infof("Successfully created post with for %s", username)
 	event.SendPostEvent(username, model.StatusCreated, post)
 
-	resultResponseJSON(w, http.StatusCreated, result)
+	response.ResultResponseJSON(w, http.StatusCreated, result)
 }
 
 func createComment(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +57,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -64,7 +65,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	post, err := db.FindPostById(postID, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -75,7 +76,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -86,14 +87,14 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
 	logger.Infof("Created comment for %s", username)
 	event.SendCommentEvent(username, model.StatusCreated, comment)
 
-	resultResponseJSON(w, http.StatusCreated, comment)
+	response.ResultResponseJSON(w, http.StatusCreated, comment)
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +103,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -110,7 +111,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	post, err := db.FindPostById(postID, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -121,7 +122,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		likesOnPost, err := db.FindByLikeIDS(post.UserLikes, postitDatabase)
 		if err != nil {
 			logger.Error(err)
-			messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 			return
 		}
 
@@ -129,18 +130,18 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 			if rangedLike.User == user.ID {
 				if rangedLike.Active {
 					logger.Infof("User %s has already liked %s", username, postID)
-					messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: postit_messages.ErrAlreadyLiked.Error()})
+					response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: postit_messages.ErrAlreadyLiked.Error()})
 					return
 				}
 				rangedLike.Active = true
 				err = db.UpdateLike(&rangedLike, postitDatabase)
 				if err != nil {
 					logger.Error(err)
-					messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+					response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 					return
 				}
 
-				resultResponseJSON(w, http.StatusCreated, rangedLike)
+				response.ResultResponseJSON(w, http.StatusCreated, rangedLike)
 				return
 			}
 		}
@@ -153,7 +154,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -164,13 +165,13 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
 	logger.Infof("Created like for %s", username)
 	event.SendLikeEvent(username, model.StatusCreated, like)
-	resultResponseJSON(w, http.StatusCreated, like)
+	response.ResultResponseJSON(w, http.StatusCreated, like)
 }
 
 func fetchPost(w http.ResponseWriter, r *http.Request) {
@@ -186,11 +187,11 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
-	resultResponseJSON(w, http.StatusOK, rawData)
+	response.ResultResponseJSON(w, http.StatusOK, rawData)
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
@@ -201,7 +202,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	post, err := db.FindPostById(postID, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -209,12 +210,12 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	err = db.UpdatePost(&post, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 	logger.Infof("Successfully deleted post %s", postID)
 	event.SendPostEvent(usernameString, model.StatusDeleted, &post)
-	resultResponseJSON(w, http.StatusOK, post)
+	response.ResultResponseJSON(w, http.StatusOK, post)
 }
 
 func deleteComment(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +226,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 	comment, err := db.FindCommentById(commentID, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -233,12 +234,12 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 	err = db.UpdateComment(&comment, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 	logger.Infof("Successfully deleted comment %s", commentID)
 	event.SendCommentEvent(usernameString, model.StatusDeleted, &comment)
-	resultResponseJSON(w, http.StatusOK, comment)
+	response.ResultResponseJSON(w, http.StatusOK, comment)
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +250,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	like, err := db.FindLikeById(likeID, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 
@@ -257,10 +258,10 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	err = db.UpdateLike(&like, postitDatabase)
 	if err != nil {
 		logger.Error(err)
-		messageResponseJSON(w, http.StatusBadRequest, model.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
 	logger.Infof("Successfully deleted like %s", likeID)
 	event.SendLikeEvent(usernameString, model.StatusDeleted, &like)
-	resultResponseJSON(w, http.StatusOK, like)
+	response.ResultResponseJSON(w, http.StatusOK, like)
 }
