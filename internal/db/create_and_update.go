@@ -25,6 +25,10 @@ func CreatePost(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Da
 	post.ID = primitive.NewObjectID()
 	post.Active = true
 
+	if !post.Validate() {
+		return nil, post, postit_messages.ErrInvalid
+	}
+
 	mongoResult, err := insetIntoCollection(PostCollection, post, mongoDB)
 	return mongoResult, post, err
 }

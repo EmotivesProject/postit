@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,4 +17,14 @@ type Post struct {
 	UserComments []primitive.ObjectID `bson:"user_comments" json:"user_comments"`
 	Created      time.Time            `bson:"created" json:"created"`
 	Active       bool                 `bson:"active" json:"active"`
+}
+
+func (p Post) Validate() bool {
+	fmt.Println(p.Coordinates)
+	if p.Coordinates != nil {
+		if len(p.Coordinates) != 2 {
+			return false
+		}
+	}
+	return true
 }
