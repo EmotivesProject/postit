@@ -45,7 +45,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Infof("Successfully created post with for %s", username)
+	logger.Infof("Successfully created post %s", username)
 	event.SendPostEvent(username, model.StatusCreated, post)
 
 	response.ResultResponseJSON(w, http.StatusCreated, result)
