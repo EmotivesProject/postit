@@ -174,6 +174,21 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusCreated, like)
 }
 
+func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
+	postitDatabase := db.GetDatabase()
+	username := r.Context().Value(userID)
+	usernameString := fmt.Sprintf("%v", username)
+	user, err := db.FindUser(usernameString, postitDatabase)
+
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		return
+	}
+
+	response.ResultResponseJSON(w, http.StatusOK, user)
+}
+
 func fetchPost(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
 	begin := findBegin(r)
