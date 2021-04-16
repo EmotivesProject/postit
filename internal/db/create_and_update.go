@@ -8,9 +8,9 @@ import (
 	"postit/model"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func CreatePost(body io.ReadCloser, userID primitive.ObjectID, mongoDB *mongo.Database) (*mongo.InsertOneResult, *model.Post, error) {

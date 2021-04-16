@@ -33,7 +33,7 @@ func Connect() {
 
 	logger.Info("Connected to MongoDB!")
 
-	db = client.Database("postit-db")
+	db = client.Database(DBName)
 }
 
 func GetDatabase() *mongo.Database {

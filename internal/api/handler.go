@@ -209,6 +209,26 @@ func fetchPost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusOK, rawData)
 }
 
+func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
+	postitDatabase := db.GetDatabase()
+	postID := chi.URLParam(r, postParam)
+
+	postPipelineMongo := db.FindOnePostPipeline(postID)
+
+	rawData, err := db.GetRawResponseFromAggregate(
+		db.PostCollection,
+		postPipelineMongo,
+		postitDatabase,
+	)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		return
+	}
+
+	response.ResultResponseJSON(w, http.StatusOK, rawData)
+}
+
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
 	username := r.Context().Value(userID)

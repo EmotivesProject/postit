@@ -21,6 +21,8 @@ func CreateRouter() chi.Router {
 			r.Post("/", createPost)
 
 			r.Route("/{post_id}", func(r chi.Router) {
+
+				r.Get("/", fetchIndividualPost)
 				r.Delete("/", deletePost)
 
 				r.Route("/like", func(r chi.Router) {

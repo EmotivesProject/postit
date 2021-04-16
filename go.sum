@@ -1,6 +1,5 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/TomBowyerResearchProject/common v0.0.0-20210415091410-088ae6038e62 h1:ZCjoaDiFKhTdtINbLbLTv44TjWe+VwSEMGK3YFerb+k=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de h1:ctDA7RKbq9YNOJEsZhW95cBM61Gq0Q49REvrtQvnLSY=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/response v0.0.0-20210415091410-088ae6038e62 h1:SkSNR6nCjfJso+Yuuoq+GN92PVM34KUwHiY7r6VP1Q0=
