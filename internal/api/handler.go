@@ -10,6 +10,7 @@ import (
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/response"
+	"github.com/TomBowyerResearchProject/common/verification"
 
 	"github.com/go-chi/chi"
 )
@@ -26,7 +27,7 @@ func healthz(w http.ResponseWriter, r *http.Request) {
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID).(string)
+	username := r.Context().Value(verification.UserID).(string)
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
@@ -53,7 +54,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 func createComment(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID).(string)
+	username := r.Context().Value(verification.UserID).(string)
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
@@ -99,7 +100,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 
 func createLike(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID).(string)
+	username := r.Context().Value(verification.UserID).(string)
 	user, err := db.FindUser(username, postitDatabase)
 	if err != nil {
 		logger.Error(err)
@@ -176,7 +177,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 
 func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID)
+	username := r.Context().Value(verification.UserID)
 	usernameString := fmt.Sprintf("%v", username)
 	user, err := db.FindUser(usernameString, postitDatabase)
 
@@ -231,7 +232,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postitDatabase := db.GetDatabase()
-	username := r.Context().Value(userID)
+	username := r.Context().Value(verification.UserID)
 	usernameString := fmt.Sprintf("%v", username)
 	postID := chi.URLParam(r, postParam)
 	post, err := db.FindPostById(postID, postitDatabase)
@@ -254,7 +255,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteComment(w http.ResponseWriter, r *http.Request) {
-	username := r.Context().Value(userID)
+	username := r.Context().Value(verification.UserID)
 	usernameString := fmt.Sprintf("%v", username)
 	postitDatabase := db.GetDatabase()
 	commentID := chi.URLParam(r, "comment_id")
@@ -278,7 +279,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
-	username := r.Context().Value(userID)
+	username := r.Context().Value(verification.UserID)
 	usernameString := fmt.Sprintf("%v", username)
 	postitDatabase := db.GetDatabase()
 	likeID := chi.URLParam(r, "like_id")

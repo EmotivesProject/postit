@@ -8,12 +8,17 @@ import (
 	"postit/internal/db"
 
 	"github.com/TomBowyerResearchProject/common/logger"
+	"github.com/TomBowyerResearchProject/common/verification"
 
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	logger.InitLogger("postit")
+
+	verification.Init(verification.VerificationConfig{
+		VerificationURL: "http://uacl/authorize",
+	})
 
 	db.Connect()
 
