@@ -20,7 +20,7 @@ func main() {
 		VerificationURL: "http://uacl/authorize",
 	})
 
-	db.Connect()
+	db.ConnectDB()
 
 	router := api.CreateRouter()
 

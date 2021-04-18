@@ -1,81 +1,81 @@
 package db
 
 import (
-	"context"
 	"postit/model"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
-func FindUser(username string, mongoDB *mongo.Database) (model.User, error) {
-	user := model.User{}
-	filter := bson.D{primitive.E{Key: "username", Value: username}}
+func FindByUsername(username string) (model.User, error) {
+	user := &model.User{}
+	database := GetDB()
 
-	usersCollection := mongoDB.Collection(UserCollection)
-	err := usersCollection.FindOne(context.TODO(), filter).Decode(&user)
-
-	// Create the user
-	if err == mongo.ErrNoDocuments {
-		userdef, err := CreateUser(username, mongoDB)
-		return *userdef, err
+	if err := database.Where("username = ?", username).First(user).Error; err != nil {
+		return *user, err
 	}
-	return user, err
+
+	return *user, nil
 }
 
-func FindPostById(postID string, mongoDB *mongo.Database) (model.Post, error) {
-	var post model.Post
-	hex, err := primitive.ObjectIDFromHex(postID)
-	if err != nil {
-		return post, err
+func CheckUsername(username string) error {
+	_, err := FindByUsername(username)
+	if err == gorm.ErrRecordNotFound {
+		_, err = CreateUser(username)
 	}
-	result := findByID(hex, PostCollection, mongoDB)
-	err = result.Decode(&post)
-
-	return post, err
+	return err
 }
 
-func FindCommentById(commentID string, mongoDB *mongo.Database) (model.Comment, error) {
-	var comment model.Comment
-	hex, err := primitive.ObjectIDFromHex(commentID)
-	if err != nil {
-		return comment, err
+func FindPostById(postID int) (model.Post, error) {
+	post := &model.Post{}
+	database := GetDB()
+
+	if err := database.Where("id = ?", postID).First(post).Error; err != nil {
+		return *post, err
 	}
-	result := findByID(hex, CommentCollection, mongoDB)
-	err = result.Decode(&comment)
 
-	return comment, err
+	return *post, nil
 }
 
-func FindLikeById(likeID string, mongoDB *mongo.Database) (model.Like, error) {
-	var like model.Like
-	hex, err := primitive.ObjectIDFromHex(likeID)
-	if err != nil {
-		return like, err
+func FindCommentById(commentID int) (model.Comment, error) {
+	comment := &model.Comment{}
+	database := GetDB()
+
+	if err := database.Where("id = ?", commentID).First(comment).Error; err != nil {
+		return *comment, err
 	}
-	result := findByID(hex, LikeCollection, mongoDB)
-	err = result.Decode(&like)
 
-	return like, err
+	return *comment, nil
 }
 
-func findByID(id primitive.ObjectID, collection string, mongoDB *mongo.Database) *mongo.SingleResult {
-	filter := bson.M{"_id": id}
-	databaseCollection := mongoDB.Collection(collection)
-	return databaseCollection.FindOne(context.TODO(), filter)
+func FindLikeById(likeID int) (model.Like, error) {
+	like := &model.Like{}
+	database := GetDB()
+
+	if err := database.Where("id = ?", likeID).First(like).Error; err != nil {
+		return *like, err
+	}
+
+	return *like, nil
 }
 
-func FindByLikeIDS(UserLikes []primitive.ObjectID, mongoDB *mongo.Database) ([]model.Like, error) {
+func FindCommentsForPost(postID int) ([]model.Comment, error) {
+	var comments []model.Comment
+	database := GetDB()
+
+	if err := database.Where("post_id = ?", postID).Find(&comments).Error; err != nil {
+		return comments, err
+	}
+
+	return comments, nil
+}
+
+func FindLikesForPost(postID int) ([]model.Like, error) {
 	var likes []model.Like
-	query := bson.M{"_id": bson.M{"$in": UserLikes}}
-	collection := mongoDB.Collection(LikeCollection)
+	database := GetDB()
 
-	cur, err := collection.Find(context.TODO(), query)
-	if err != nil {
+	if err := database.Where("post_id = ? AND active = true", postID).Find(&likes).Error; err != nil {
 		return likes, err
 	}
 
-	err = cur.All(context.TODO(), &likes)
-	return likes, err
+	return likes, nil
 }

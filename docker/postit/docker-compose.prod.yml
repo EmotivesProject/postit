@@ -23,23 +23,20 @@ services:
       emotives:
         aliases:
           - postit
-  mongo:
-    image: mongo:latest
+  db:
+    image: postgres
     environment:
-      MONGO_INITDB_DATABASE: postit-db
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-    ports:
-      - 27017:27017
+      POSTGRES_PASSWORD: tom123
+      POSTGRES_USER: tom
     volumes:
-      - mongodb_data:/data/db
-      - ../../db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - postgres-data:/var/lib/postgresql/data/
+      - ../../database/Initial/:/docker-entrypoint-initdb.d/
     restart: unless-stopped
     networks:
       default:
 
 volumes:
-  mongodb_data:
+  postgres-data:
 
 networks:
   emotives:

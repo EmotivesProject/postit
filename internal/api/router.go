@@ -18,12 +18,12 @@ func CreateRouter() chi.Router {
 		})
 
 		r.With(verification.VerifyJTW()).Route("/post", func(r chi.Router) {
-			r.Get("/", fetchPost)
 			r.Post("/", createPost)
+			r.Get("/", fetchPosts)
 
 			r.Route("/{post_id}", func(r chi.Router) {
-
 				r.Get("/", fetchIndividualPost)
+
 				r.Delete("/", deletePost)
 
 				r.Route("/like", func(r chi.Router) {

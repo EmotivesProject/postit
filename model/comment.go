@@ -2,14 +2,14 @@ package model
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Comment struct {
-	ID      primitive.ObjectID `bson:"_id" json:"id"`
-	User    primitive.ObjectID `bson:"user" json:"user"`
-	Message string             `bson:"message" json:"message"`
-	Created time.Time          `bson:"created" json:"created"`
-	Active  bool               `bson:"active" json:"active"`
+	ID        int       `json:"id,omitempty" gorm:"primaryKey"`
+	PostID    int       `json:"post_id"`
+	Username  string    `json:"username"`
+	Message   string    `json:"message"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Active    bool      `json:"active"`
 }

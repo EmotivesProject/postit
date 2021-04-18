@@ -1,14 +1,12 @@
 package model
 
-import (
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
+import "time"
 
 type Like struct {
-	ID      primitive.ObjectID `bson:"_id" json:"id"`
-	User    primitive.ObjectID `bson:"user" json:"user"`
-	Created time.Time          `bson:"created" json:"created"`
-	Active  bool               `bson:"active" json:"active"`
+	ID        int       `json:"id,omitempty" gorm:"primaryKey"`
+	PostID    int       `json:"post_id"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Active    bool      `json:"active"`
 }
