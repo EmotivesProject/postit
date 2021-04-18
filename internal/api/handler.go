@@ -232,6 +232,40 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 
 // Next two functions don't just return individual objects, but all the references to it e.g. All the comments and
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
+	page := findBegin(r)
+	var postInformations []model.PostInformation
+
+	posts, err := db.FindPosts(page)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		return
+	}
+
+	for _, post := range posts {
+		comments, err := db.FindCommentsForPost(post.ID)
+		if err != nil {
+			logger.Error(err)
+			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+			return
+		}
+
+		likes, err := db.FindLikesForPost(post.ID)
+		if err != nil {
+			logger.Error(err)
+			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+			return
+		}
+
+		postInformation := model.PostInformation{
+			Post:     post,
+			Comments: comments,
+			Likes:    likes,
+		}
+
+		postInformations = append(postInformations, postInformation)
+	}
+	response.ResultResponseJSON(w, http.StatusOK, postInformations)
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +283,6 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
-	logger.Info("PAST POST")
 
 	comments, err := db.FindCommentsForPost(postID)
 	if err != nil {
@@ -257,7 +290,6 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
-	logger.Info("PAST Comment")
 
 	likes, err := db.FindLikesForPost(postID)
 	if err != nil {
@@ -265,7 +297,6 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 		return
 	}
-	logger.Info("PAST Likes")
 
 	postInfo := model.PostInformation{
 		Post:     post,

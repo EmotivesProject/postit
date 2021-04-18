@@ -6,6 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	PostLimit = 5
+)
+
 func FindByUsername(username string) (model.User, error) {
 	user := &model.User{}
 	database := GetDB()
@@ -34,6 +38,15 @@ func FindPostById(postID int) (model.Post, error) {
 	}
 
 	return *post, nil
+}
+
+func FindPosts(offset int) ([]model.Post, error) {
+	var posts []model.Post
+	database := GetDB()
+
+	database.Order("created_at desc").Limit(PostLimit).Offset(offset).Find(&posts)
+
+	return posts, nil
 }
 
 func FindCommentById(commentID int) (model.Comment, error) {
