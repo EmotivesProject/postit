@@ -3,10 +3,7 @@
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     username VARCHAR(128) NOT NULL,
-    message TEXT default null,
-    image_path TEXT default null,
-    longitude decimal default null,
-    latitude decimal default null,
+    content JSONB NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     active BOOLEAN default false,

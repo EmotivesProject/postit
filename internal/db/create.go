@@ -19,17 +19,15 @@ func CreateUser(username string) (*model.User, error) {
 
 func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 	post := model.Post{}
-	err := json.NewDecoder(body).Decode(&post)
+	jsonMap := make(map[string]interface{})
+	err := json.NewDecoder(body).Decode(&jsonMap)
 	if err != nil {
-		return &post, postit_messages.ErrFailedDecoding
+		return &post, err
 	}
 
+	post.Content = jsonMap["content"].(map[string]interface{})
 	post.Username = username
 	post.Active = true
-
-	if !post.Validate() {
-		return &post, postit_messages.ErrInvalid
-	}
 
 	connection := GetDB()
 	createdPost := connection.Create(&post)
