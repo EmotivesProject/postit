@@ -17,6 +17,8 @@ services:
       - "traefik.http.routers.postit.tls.certresolver=letsencrypt"
       - "traefik.docker.network=traefik"
     restart: unless-stopped
+    depends_on:
+      - "db"
     networks:
       traefik:
       default:

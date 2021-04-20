@@ -16,6 +16,8 @@ services:
       - "traefik.http.routers.postit.entrypoints=web"
       - "traefik.docker.network=traefik"
     restart: unless-stopped
+    depends_on:
+      - "db"
     networks:
       traefik:
       default:
