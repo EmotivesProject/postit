@@ -6,6 +6,7 @@ import (
 	"os"
 	"postit/internal/api"
 	"postit/internal/db"
+	"postit/internal/event"
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/verification"
@@ -19,6 +20,8 @@ func main() {
 	verification.Init(verification.VerificationConfig{
 		VerificationURL: "http://uacl/authorize",
 	})
+
+	event.Init()
 
 	db.ConnectDB()
 
