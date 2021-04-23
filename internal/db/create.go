@@ -3,7 +3,7 @@ package db
 import (
 	"encoding/json"
 	"io"
-	"postit/internal/postit_messages"
+	"postit/messages"
 	"postit/model"
 )
 
@@ -39,7 +39,7 @@ func CreateComment(body io.ReadCloser, username string, postID int) (*model.Comm
 	comment := model.Comment{}
 	err := json.NewDecoder(body).Decode(&comment)
 	if err != nil {
-		return &comment, postit_messages.ErrFailedDecoding
+		return &comment, messages.ErrFailedDecoding
 	}
 
 	comment.Username = username

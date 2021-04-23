@@ -7,6 +7,8 @@ github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415091410-088ae603
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415091410-088ae6038e62/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210417015643-04e74c7fb06d h1:8prilBDOY+GTZ4AXHbzq00thMFuUXc/oZ5gu8anYKXk=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210417015643-04e74c7fb06d/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
+github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210423101122-6f535e949eb8 h1:JZLZq5N0pjaoL6K7k7hatX3UtqBJ9IGQCNm3A6P9eDc=
+github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210423101122-6f535e949eb8/go.mod h1:p/Ed6RvbJ4tMjVLY3wUahMeeC441aKl1CB23FTnPAWo=
 github.com/TomBowyerResearchProject/common/response v0.0.0-20210415091410-088ae6038e62 h1:SkSNR6nCjfJso+Yuuoq+GN92PVM34KUwHiY7r6VP1Q0=
 github.com/TomBowyerResearchProject/common/response v0.0.0-20210415091410-088ae6038e62/go.mod h1:fib988ehDtUcBwwwNhHWjQSSruMEEMCLb5QZnfyWU84=
 github.com/TomBowyerResearchProject/common/response v0.0.0-20210417015643-04e74c7fb06d h1:S6fwzdRzELrFGTwyZkwcZmhr0Bk48ski9wrLLZWb1VQ=

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"postit/internal/event"
-	"postit/internal/postit_messages"
+	"postit/messages"
 	"postit/model"
 	"strconv"
 
@@ -30,8 +30,8 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	err := db.CheckUsername(username)
 	if err != nil {
-		logger.Error(postit_messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: postit_messages.ErrInvalidUsername.Error()})
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 		return
 	}
 
@@ -56,8 +56,8 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 
 	err := db.CheckUsername(username)
 	if err != nil {
-		logger.Error(postit_messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: postit_messages.ErrInvalidUsername.Error()})
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 		return
 	}
 
@@ -91,8 +91,8 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 
 	err := db.CheckUsername(username)
 	if err != nil {
-		logger.Error(postit_messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: postit_messages.ErrInvalidUsername.Error()})
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 		return
 	}
 
@@ -124,8 +124,8 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 
 	err := db.CheckUsername(username)
 	if err != nil {
-		logger.Error(postit_messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: postit_messages.ErrInvalidUsername.Error()})
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 		return
 	}
 

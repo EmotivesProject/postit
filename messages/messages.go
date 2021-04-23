@@ -1,4 +1,4 @@
-package postit_messages
+package messages
 
 import "errors"
 
