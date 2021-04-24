@@ -6,8 +6,8 @@ import (
 	"os"
 	"postit/internal/api"
 	"postit/internal/db"
-	"postit/internal/event"
 
+	commonKafka "github.com/TomBowyerResearchProject/common/kafka"
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/middlewares"
 	"github.com/TomBowyerResearchProject/common/verification"
@@ -22,7 +22,10 @@ func main() {
 		VerificationURL: "http://uacl/authorize",
 	})
 
-	event.Init()
+	commonKafka.InitProducer(commonKafka.ConfigProducer{
+		Topic:  "EVENT",
+		Server: "kafka:9092",
+	})
 
 	db.ConnectDB()
 

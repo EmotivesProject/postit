@@ -1,12 +1,17 @@
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/TomBowyerResearchProject/common v1.0.0 h1:fUe9NdA35Krgun7g6jctYv1H7oBzQiOE2E0QvvH5st0=
+github.com/TomBowyerResearchProject/common v1.0.1-0.20210424013532-4411be89261b h1:tJ5UCpv9H3E+xlpPinsGNbdDmfeZrdiiYx5sOfus+us=
+github.com/TomBowyerResearchProject/common/kafka v0.0.0-20210424013532-4411be89261b h1:5VskR/G2VUpdzSe5F4LJH+mPM8MGXiC4jH7PMVUQcxE=
+github.com/TomBowyerResearchProject/common/kafka v0.0.0-20210424013532-4411be89261b/go.mod h1:PYbdFrRSU2OvpiA/kG03DE+iX34bdQ0AjY51IHY3kXc=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de h1:ctDA7RKbq9YNOJEsZhW95cBM61Gq0Q49REvrtQvnLSY=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415091410-088ae6038e62 h1:Zu2MWdAodPcroleF4VVOVX2L7OlVU61II6IEI2Ike2k=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415091410-088ae6038e62/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210417015643-04e74c7fb06d h1:8prilBDOY+GTZ4AXHbzq00thMFuUXc/oZ5gu8anYKXk=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210417015643-04e74c7fb06d/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
+github.com/TomBowyerResearchProject/common/logger v0.0.0-20210424011324-ad4adfbed85d h1:mpA1B6q+W8/4ykHxFoe8IQ2cFKLjT5F0kvvCbXA+8hI=
+github.com/TomBowyerResearchProject/common/logger v0.0.0-20210424011324-ad4adfbed85d/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210423101122-6f535e949eb8 h1:JZLZq5N0pjaoL6K7k7hatX3UtqBJ9IGQCNm3A6P9eDc=
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210423101122-6f535e949eb8/go.mod h1:p/Ed6RvbJ4tMjVLY3wUahMeeC441aKl1CB23FTnPAWo=
 github.com/TomBowyerResearchProject/common/response v0.0.0-20210415091410-088ae6038e62 h1:SkSNR6nCjfJso+Yuuoq+GN92PVM34KUwHiY7r6VP1Q0=

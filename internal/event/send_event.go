@@ -1,28 +1,10 @@
 package event
 
 import (
-	"encoding/json"
 	"postit/model"
 
-	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	commonKafka "github.com/TomBowyerResearchProject/common/kafka"
 )
-
-var (
-	topic         = "EVENT"
-	kafkaProducer *kafka.Producer
-)
-
-func Init() {
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers": "kafka:9092",
-	})
-	if err != nil {
-		logger.Error(err)
-	}
-
-	kafkaProducer = producer
-}
 
 func SendPostEvent(username, status string, post *model.Post) {
 	eventData := model.EventData{
@@ -34,7 +16,7 @@ func SendPostEvent(username, status string, post *model.Post) {
 		CustomerEvent: model.EventPost,
 		Data:          eventData,
 	}
-	sendEvent(event)
+	commonKafka.ProduceEvent(event)
 }
 
 func SendLikeEvent(username, status string, like *model.Like) {
@@ -47,7 +29,7 @@ func SendLikeEvent(username, status string, like *model.Like) {
 		CustomerEvent: model.EventLike,
 		Data:          eventData,
 	}
-	sendEvent(event)
+	commonKafka.ProduceEvent(event)
 }
 
 func SendCommentEvent(username, status string, comment *model.Comment) {
@@ -60,24 +42,5 @@ func SendCommentEvent(username, status string, comment *model.Comment) {
 		CustomerEvent: model.EventComment,
 		Data:          eventData,
 	}
-	sendEvent(event)
-}
-
-func sendEvent(event model.Event) {
-	stringEvent, err := json.Marshal(event)
-	if err != nil {
-		logger.Error(err)
-	}
-
-	err = kafkaProducer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          []byte(stringEvent)},
-		nil,
-	)
-
-	if err != nil {
-		logger.Error(err)
-	} else {
-		logger.Infof("Sent event off to kafka %s", event)
-	}
+	commonKafka.ProduceEvent(event)
 }
