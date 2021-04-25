@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 	"postit/internal/api"
-	"postit/internal/db"
 
 	commonKafka "github.com/TomBowyerResearchProject/common/kafka"
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/middlewares"
+	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 	"github.com/TomBowyerResearchProject/common/verification"
 
 	"github.com/joho/godotenv"
@@ -27,8 +27,6 @@ func main() {
 		Server: "kafka:9092",
 	})
 
-	db.ConnectDB()
-
 	middlewares.Init(middlewares.Config{
 		AllowedOrigin:  "*",
 		AllowedMethods: "GET,POST,DELETE,OPTIONS",
@@ -41,8 +39,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
 
-	log.Fatal(http.ListenAndServe(host+":"+port, router))
+	commonPostgres.Connect(commonPostgres.Config{
+		URI: os.Getenv("databaseURL"),
+	})
+
+	log.Fatal(http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), router))
 }

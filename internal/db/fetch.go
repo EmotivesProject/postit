@@ -1,25 +1,16 @@
 package db
 
 import (
+	"context"
 	"postit/model"
 
+	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 	"gorm.io/gorm"
 )
 
 const (
 	PostLimit = 5
 )
-
-func FindByUsername(username string) (model.User, error) {
-	user := &model.User{}
-	database := GetDB()
-
-	if err := database.Where("username = ?", username).First(user).Error; err != nil {
-		return *user, err
-	}
-
-	return *user, nil
-}
 
 func CheckUsername(username string) error {
 	_, err := FindByUsername(username)
@@ -29,54 +20,126 @@ func CheckUsername(username string) error {
 	return err
 }
 
+func FindByUsername(username string) (model.User, error) {
+	user := &model.User{}
+	connection := commonPostgres.GetDatabase()
+
+	err := connection.QueryRow(
+		context.Background(),
+		"SELECT id, username FROM users WHERE username = $1",
+		username,
+	).Scan(
+		&user.ID, &user.Username,
+	)
+
+	return *user, err
+}
+
 func FindPostById(postID int) (model.Post, error) {
 	post := &model.Post{}
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	if err := database.Where("id = ?", postID).First(post).Error; err != nil {
-		return *post, err
-	}
+	err := connection.QueryRow(
+		context.Background(),
+		"SELECT id, username, content, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		postID,
+	).Scan(
+		&post.ID, &post.Username, &post.Content, &post.CreatedAt, &post.UpdatedAt, &post.Active,
+	)
 
-	return *post, nil
+	return *post, err
 }
 
 func FindPosts(offset int) ([]model.Post, error) {
 	var posts []model.Post
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	database.Order("created_at desc").Limit(PostLimit).Offset(offset).Find(&posts)
+	rows, err := connection.Query(
+		context.Background(),
+		"SELECT * FROM posts ORDER BY created_at desc LIMIT 5 OFFSET $1",
+		offset,
+	)
+	if err != nil {
+		return posts, err
+	}
+
+	for rows.Next() {
+		var post model.Post
+		err := rows.Scan(
+			&post.ID,
+			&post.Username,
+			&post.Content,
+			&post.CreatedAt,
+			&post.UpdatedAt,
+			&post.Active,
+		)
+		if err != nil {
+			continue
+		}
+		posts = append(posts, post)
+	}
 
 	return posts, nil
 }
 
 func FindCommentById(commentID int) (model.Comment, error) {
 	comment := &model.Comment{}
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	if err := database.Where("id = ?", commentID).First(comment).Error; err != nil {
-		return *comment, err
-	}
+	err := connection.QueryRow(
+		context.Background(),
+		"SELECT id, post_id, username, message, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		commentID,
+	).Scan(
+		&comment.ID, &comment.PostID, &comment.Username, &comment.Message, &comment.CreatedAt, &comment.UpdatedAt, &comment.Active,
+	)
 
-	return *comment, nil
+	return *comment, err
 }
 
 func FindLikeById(likeID int) (model.Like, error) {
 	like := &model.Like{}
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	if err := database.Where("id = ?", likeID).First(like).Error; err != nil {
-		return *like, err
-	}
+	err := connection.QueryRow(
+		context.Background(),
+		"SELECT id, post_id, username, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		likeID,
+	).Scan(
+		&like.ID, &like.PostID, &like.Username, &like.CreatedAt, &like.UpdatedAt, &like.Active,
+	)
 
-	return *like, nil
+	return *like, err
 }
 
 func FindCommentsForPost(postID int) ([]model.Comment, error) {
 	var comments []model.Comment
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	if err := database.Where("post_id = ?", postID).Find(&comments).Error; err != nil {
+	rows, err := connection.Query(
+		context.Background(),
+		"SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at desc",
+		postID,
+	)
+	if err != nil {
 		return comments, err
+	}
+
+	for rows.Next() {
+		var comment model.Comment
+		err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.Username,
+			&comment.Message,
+			&comment.CreatedAt,
+			&comment.UpdatedAt,
+			&comment.Active,
+		)
+		if err != nil {
+			continue
+		}
+		comments = append(comments, comment)
 	}
 
 	return comments, nil
@@ -84,10 +147,31 @@ func FindCommentsForPost(postID int) ([]model.Comment, error) {
 
 func FindLikesForPost(postID int) ([]model.Like, error) {
 	var likes []model.Like
-	database := GetDB()
+	connection := commonPostgres.GetDatabase()
 
-	if err := database.Where("post_id = ? AND active = true", postID).Find(&likes).Error; err != nil {
+	rows, err := connection.Query(
+		context.Background(),
+		"SELECT * FROM likes WHERE post_id = $1 ORDER BY created_at desc",
+		postID,
+	)
+	if err != nil {
 		return likes, err
+	}
+
+	for rows.Next() {
+		var like model.Like
+		err := rows.Scan(
+			&like.ID,
+			&like.PostID,
+			&like.Username,
+			&like.CreatedAt,
+			&like.UpdatedAt,
+			&like.Active,
+		)
+		if err != nil {
+			continue
+		}
+		likes = append(likes, like)
 	}
 
 	return likes, nil
