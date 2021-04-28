@@ -5,7 +5,6 @@ import (
 	"postit/model"
 
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
-	"gorm.io/gorm"
 )
 
 const (
@@ -14,7 +13,7 @@ const (
 
 func CheckUsername(username string) error {
 	_, err := FindByUsername(username)
-	if err == gorm.ErrRecordNotFound {
+	if err != nil {
 		_, err = CreateUser(username)
 	}
 	return err
