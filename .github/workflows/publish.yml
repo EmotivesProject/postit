@@ -1,0 +1,36 @@
+name: Merged items
+
+# only trigger on pull request closed events
+on:
+  pull_request:
+    types: [ closed ]
+
+jobs:
+  build-and-push-image:
+    # this job will only run if the PR has been merged
+    if: github.event.pull_request.merged == true
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 1
+      - name: Build image
+        run: ./scripts/build.sh
+      - name: Log in and push
+        run: |
+          echo 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 | docker login ghcr.io -u imthetom --password-stdin
+          docker push ghcr.io/tombowyerresearchproject/postit_api:latest
+      - name: Connect and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: 162.0.216.160
+          username: root
+          password: Github123
+          port: 22
+          script: |
+            echo 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 | docker login ghcr.io -u imthetom --password-stdin
+            docker pull ghcr.io/tombowyerresearchproject/postit_api:latest
+            rm -R postit
+            git clone git@github.com:TomBowyerResearchProject/postit.git
+            cd postit
+            ./scripts/start.sh prod

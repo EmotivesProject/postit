@@ -11,9 +11,11 @@ func findBegin(r *http.Request) int {
 	if pagesParam == "" {
 		pagesParam = "0"
 	}
+
 	skip, err := strconv.Atoi(pagesParam)
 	if err != nil {
 		return 0
 	}
+
 	return db.PostLimit * skip
 }
