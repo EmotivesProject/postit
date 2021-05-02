@@ -7,15 +7,14 @@ import (
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 )
 
-const (
-	PostLimit = 5
-)
+const PostLimit = 5
 
 func CheckUsername(username string) error {
 	_, err := FindByUsername(username)
 	if err != nil {
 		_, err = CreateUser(username)
 	}
+
 	return err
 }
 
@@ -34,7 +33,7 @@ func FindByUsername(username string) (model.User, error) {
 	return *user, err
 }
 
-func FindPostById(postID int) (model.Post, error) {
+func FindPostByID(postID int) (model.Post, error) {
 	post := &model.Post{}
 	connection := commonPostgres.GetDatabase()
 
@@ -51,6 +50,7 @@ func FindPostById(postID int) (model.Post, error) {
 
 func FindPosts(offset int) ([]model.Post, error) {
 	var posts []model.Post
+
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
@@ -64,6 +64,7 @@ func FindPosts(offset int) ([]model.Post, error) {
 
 	for rows.Next() {
 		var post model.Post
+
 		err := rows.Scan(
 			&post.ID,
 			&post.Username,
@@ -75,13 +76,14 @@ func FindPosts(offset int) ([]model.Post, error) {
 		if err != nil {
 			continue
 		}
+
 		posts = append(posts, post)
 	}
 
 	return posts, nil
 }
 
-func FindCommentById(commentID int) (model.Comment, error) {
+func FindCommentByID(commentID int) (model.Comment, error) {
 	comment := &model.Comment{}
 	connection := commonPostgres.GetDatabase()
 
@@ -90,13 +92,19 @@ func FindCommentById(commentID int) (model.Comment, error) {
 		"SELECT id, post_id, username, message, created_at, updated_at, active FROM posts WHERE post_id = $1",
 		commentID,
 	).Scan(
-		&comment.ID, &comment.PostID, &comment.Username, &comment.Message, &comment.CreatedAt, &comment.UpdatedAt, &comment.Active,
+		&comment.ID,
+		&comment.PostID,
+		&comment.Username,
+		&comment.Message,
+		&comment.CreatedAt,
+		&comment.UpdatedAt,
+		&comment.Active,
 	)
 
 	return *comment, err
 }
 
-func FindLikeById(likeID int) (model.Like, error) {
+func FindLikeByID(likeID int) (model.Like, error) {
 	like := &model.Like{}
 	connection := commonPostgres.GetDatabase()
 
@@ -113,6 +121,7 @@ func FindLikeById(likeID int) (model.Like, error) {
 
 func FindCommentsForPost(postID int) ([]model.Comment, error) {
 	var comments []model.Comment
+
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
@@ -126,6 +135,7 @@ func FindCommentsForPost(postID int) ([]model.Comment, error) {
 
 	for rows.Next() {
 		var comment model.Comment
+
 		err := rows.Scan(
 			&comment.ID,
 			&comment.PostID,
@@ -138,6 +148,7 @@ func FindCommentsForPost(postID int) ([]model.Comment, error) {
 		if err != nil {
 			continue
 		}
+
 		comments = append(comments, comment)
 	}
 
@@ -146,6 +157,7 @@ func FindCommentsForPost(postID int) ([]model.Comment, error) {
 
 func FindLikesForPost(postID int) ([]model.Like, error) {
 	var likes []model.Like
+
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
@@ -159,6 +171,7 @@ func FindLikesForPost(postID int) ([]model.Like, error) {
 
 	for rows.Next() {
 		var like model.Like
+
 		err := rows.Scan(
 			&like.ID,
 			&like.PostID,
@@ -170,6 +183,7 @@ func FindLikesForPost(postID int) ([]model.Like, error) {
 		if err != nil {
 			continue
 		}
+
 		likes = append(likes, like)
 	}
 

@@ -9,7 +9,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ../../:/app
     environment:
-      - BASE_HOST=http://
+      DATABASE_URL: postgres://tom:tom123@db:5432/postit_db
+      HOST: 0.0.0.0
+      PORT: 80
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"
@@ -31,7 +33,7 @@ services:
       POSTGRES_USER: tom
     volumes:
       - postgres-data:/var/lib/postgresql/data/
-      - ../../database/Initial/:/docker-entrypoint-initdb.d/
+      - ../../database/:/docker-entrypoint-initdb.d/
     restart: unless-stopped
     networks:
       default:

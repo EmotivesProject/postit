@@ -29,6 +29,7 @@ func CreateUser(username string) (*model.User, error) {
 func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 	post := model.Post{}
 	jsonMap := make(map[string]interface{})
+
 	err := json.NewDecoder(body).Decode(&jsonMap)
 	if err != nil {
 		return &post, err
@@ -38,7 +39,13 @@ func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = time.Now()
 	post.Active = true
-	post.Content = jsonMap["content"].(map[string]interface{})
+
+	convertedContent, ok := jsonMap["content"].(map[string]interface{})
+	if !ok {
+		return &post, messages.ErrInvalid
+	}
+
+	post.Content = convertedContent
 
 	connection := commonPostgres.GetDatabase()
 	err = connection.QueryRow(
@@ -58,6 +65,7 @@ func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 
 func CreateComment(body io.ReadCloser, username string, postID int) (*model.Comment, error) {
 	comment := model.Comment{}
+
 	err := json.NewDecoder(body).Decode(&comment)
 	if err != nil {
 		return &comment, messages.ErrFailedDecoding
