@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose -f docker/uacl/docker-compose.yml down
+docker-compose -f docker/postit/docker-compose.yml down
