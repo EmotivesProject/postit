@@ -35,6 +35,9 @@ services:
     restart: unless-stopped
     networks:
       default:
+      emotives:
+        aliases:
+          - postit_db
 
 volumes:
   postgres-data:
