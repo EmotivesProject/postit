@@ -6,7 +6,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     environment:
-      DATABASE_URL: postgres://tom:tom123@db:5432/postit_db
+      DATABASE_URL: postgres://tom:tom123@postgres_db:5432/postit_db
       HOST: 0.0.0.0
       PORT: 80
     labels:
@@ -16,28 +16,12 @@ services:
       - "traefik.http.routers.postit.tls.certresolver=letsencrypt"
       - "traefik.docker.network=traefik"
     restart: unless-stopped
-    depends_on:
-      - "db"
     networks:
       traefik:
       default:
       emotives:
         aliases:
           - postit
-  db:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: tom123
-      POSTGRES_USER: tom
-    volumes:
-      - postgres-data:/var/lib/postgresql/data/
-      - ../../database/:/docker-entrypoint-initdb.d/
-    restart: unless-stopped
-    networks:
-      default:
-
-volumes:
-  postgres-data:
 
 networks:
   emotives:
