@@ -1,15 +1,14 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"postit/internal/db"
+	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
 	"strconv"
 
 	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/notification"
 	"github.com/TomBowyerResearchProject/common/response"
 	"github.com/TomBowyerResearchProject/common/verification"
 
@@ -93,17 +92,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(err)
 	} else if post.Username != username {
-		notif := notification.Notification{
-			Username: post.Username,
-			Title:    "New Comment on your post",
-			Message:  fmt.Sprintf("%s commented on your post", username),
-			Link:     "WHATEVER",
-		}
-
-		err := notification.SendEvent("notif.localhost/notification", notif)
-		if err != nil {
-			logger.Error(err)
-		}
+		send.SendComment(post.Username, username, post.ID)
 	}
 
 	logger.Infof("Created comment for %s", username)
@@ -146,6 +135,13 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
+	}
+
+	post, err := db.FindPostByID(postID)
+	if err != nil {
+		logger.Error(err)
+	} else if post.Username != username {
+		send.SendLike(post.Username, username, post.ID)
 	}
 
 	logger.Infof("Created like for %s", username)

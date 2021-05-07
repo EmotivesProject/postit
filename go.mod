@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/TomBowyerResearchProject/common/logger v0.0.0-20210502204851-4aaa9f3a3338
 	github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210502204851-4aaa9f3a3338
-	github.com/TomBowyerResearchProject/common/notification v0.0.0-20210507103333-d3e35af7eecc
+	github.com/TomBowyerResearchProject/common/notification v0.0.0-20210507204355-ca3af918d24c
 	github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210503213359-73feb244bff7
 	github.com/TomBowyerResearchProject/common/response v0.0.0-20210502204851-4aaa9f3a3338
 	github.com/TomBowyerResearchProject/common/verification v0.0.0-20210502204851-4aaa9f3a3338
@@ -13,4 +13,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.6.1 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
+	gorm.io/gorm v1.21.9 // indirect
 )
