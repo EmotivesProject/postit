@@ -7,6 +7,7 @@ github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030I
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
+github.com/TomBowyerResearchProject/common v1.0.1-0.20210507103333-d3e35af7eecc h1:EjZdpJr54WgsuyKyy7O/ExAreScLnsW9NQw2r7KgfpY=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de h1:ctDA7RKbq9YNOJEsZhW95cBM61Gq0Q49REvrtQvnLSY=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210415085024-5081280e07de/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210417015643-04e74c7fb06d h1:8prilBDOY+GTZ4AXHbzq00thMFuUXc/oZ5gu8anYKXk=
@@ -17,6 +18,8 @@ github.com/TomBowyerResearchProject/common/logger v0.0.0-20210502204851-4aaa9f3a
 github.com/TomBowyerResearchProject/common/logger v0.0.0-20210502204851-4aaa9f3a3338/go.mod h1:HxQH9yD6ypU+/pHdDaPWsTezIqaqgvzBzeTuo+zwRLc=
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210502204851-4aaa9f3a3338 h1:E2T3v+saNYLbkotiorllSyjNkhtSfuRE0vkwQBx+GKY=
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210502204851-4aaa9f3a3338/go.mod h1:p/Ed6RvbJ4tMjVLY3wUahMeeC441aKl1CB23FTnPAWo=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20210507103333-d3e35af7eecc h1:76ESaS1wrBsEuw8Cv6DqVSJHu3y3OX2m2Hu26A9qwXg=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20210507103333-d3e35af7eecc/go.mod h1:Fxd22pZ9qYnP6M0jEJ/FvasiBCMMHdBR2zJr01KMJpc=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210502204851-4aaa9f3a3338 h1:KAZEcCkj/HK3vFikGSE4IeiuoUj4TfuXxaebTbtU65c=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210502204851-4aaa9f3a3338/go.mod h1:zovfD1vC7b/W5PtvkwPgxcQt25HkBEV1xmDUhPN3wlw=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210503213359-73feb244bff7 h1:O7UUgiJBQhs3XF/n8s70Mpq8ODKlHTwMf57220cgx9A=

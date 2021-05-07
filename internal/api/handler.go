@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"postit/internal/db"
 	"postit/messages"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/TomBowyerResearchProject/common/logger"
+	"github.com/TomBowyerResearchProject/common/notification"
 	"github.com/TomBowyerResearchProject/common/response"
 	"github.com/TomBowyerResearchProject/common/verification"
 
@@ -85,6 +87,23 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
+	}
+
+	post, err := db.FindPostByID(postID)
+	if err != nil {
+		logger.Error(err)
+	} else if post.Username != username {
+		notif := notification.Notification{
+			Username: post.Username,
+			Title:    "New Comment on your post",
+			Message:  fmt.Sprintf("%s commented on your post", username),
+			Link:     "WHATEVER",
+		}
+
+		err := notification.SendEvent("notif.localhost/notification", notif)
+		if err != nil {
+			logger.Error(err)
+		}
 	}
 
 	logger.Infof("Created comment for %s", username)
