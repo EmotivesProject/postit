@@ -23,7 +23,7 @@ func SetUpIntegrationTest() {
 	}
 
 	verification.Init(verification.VerificationConfig{
-		VerificationURL: "localhost:8085/authorize",
+		VerificationURL: "localhost:8082/authorize",
 	})
 
 	router := api.CreateRouter()

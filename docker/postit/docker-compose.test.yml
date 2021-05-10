@@ -16,7 +16,7 @@ services:
     image: ghcr.io/tombowyerresearchproject/uacl_api:latest
     restart: unless-stopped
     ports:
-      - 8085:80
+      - 8082:80
     environment:
       DATABASE_URL: postgres://tom:tom123@test_db:5432/uacl_db
       HOST: 0.0.0.0

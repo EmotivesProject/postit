@@ -13,7 +13,7 @@ import (
 func TestRouterUserHandling(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commmonTest.CreateNewUser(t, "http://0.0.0.0:8085/user")
+	token := commmonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 	fmt.Println(token)
 
 	test.TearDownIntegrationTest()
