@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"postit/internal/db"
+	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
 	"strconv"
@@ -87,6 +88,13 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	post, err := db.FindPostByID(postID)
+	if err != nil {
+		logger.Error(err)
+	} else if post.Username != username {
+		send.SendComment(post.Username, username, post.ID)
+	}
+
 	logger.Infof("Created comment for %s", username)
 	response.ResultResponseJSON(w, http.StatusCreated, comment)
 }
@@ -127,6 +135,13 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
+	}
+
+	post, err := db.FindPostByID(postID)
+	if err != nil {
+		logger.Error(err)
+	} else if post.Username != username {
+		send.SendLike(post.Username, username, post.ID)
 	}
 
 	logger.Infof("Created like for %s", username)

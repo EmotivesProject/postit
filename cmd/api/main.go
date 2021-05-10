@@ -16,7 +16,7 @@ func main() {
 	logger.InitLogger("postit")
 
 	verification.Init(verification.VerificationConfig{
-		VerificationURL: "http://uacl/authorize",
+		VerificationURL: os.Getenv("VERIFICATION_URL"),
 	})
 
 	middlewares.Init(middlewares.Config{

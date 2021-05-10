@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  test_db:
+    image: ghcr.io/tombowyerresearchproject/postgres_db
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_PASSWORD: tom123
+      POSTGRES_USER: tom
+    restart: unless-stopped
+    networks:
+      default:
+
+  uacl_api:
+    image: ghcr.io/tombowyerresearchproject/uacl_api:latest
+    restart: unless-stopped
+    ports:
+      - 8082:80
+    environment:
+      DATABASE_URL: postgres://tom:tom123@test_db:5432/uacl_db
+      HOST: 0.0.0.0
+      PORT: 80
+      PRIVATE_KEY: ./../jwt/private.key
+      PUBLIC_KEY: ./../jwt/public.key
+      SECRET: qutCreate
+    networks:
+      default:

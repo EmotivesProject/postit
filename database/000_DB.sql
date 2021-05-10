@@ -1,1 +1,0 @@
-create database postit_db;
