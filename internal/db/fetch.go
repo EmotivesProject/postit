@@ -9,21 +9,21 @@ import (
 
 const PostLimit = 5
 
-func CheckUsername(username string) error {
-	_, err := FindByUsername(username)
+func CheckUsername(ctx context.Context, username string) error {
+	_, err := FindByUsername(ctx, username)
 	if err != nil {
-		_, err = CreateUser(username)
+		_, err = CreateUser(ctx, username)
 	}
 
 	return err
 }
 
-func FindByUsername(username string) (model.User, error) {
+func FindByUsername(ctx context.Context, username string) (model.User, error) {
 	user := &model.User{}
 	connection := commonPostgres.GetDatabase()
 
 	err := connection.QueryRow(
-		context.Background(),
+		ctx,
 		"SELECT id, username FROM users WHERE username = $1",
 		username,
 	).Scan(
@@ -33,12 +33,12 @@ func FindByUsername(username string) (model.User, error) {
 	return *user, err
 }
 
-func FindPostByID(postID int) (model.Post, error) {
+func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
 	post := &model.Post{}
 	connection := commonPostgres.GetDatabase()
 
 	err := connection.QueryRow(
-		context.Background(),
+		ctx,
 		"SELECT id, username, content, created_at, updated_at, active FROM posts WHERE post_id = $1",
 		postID,
 	).Scan(
@@ -48,13 +48,13 @@ func FindPostByID(postID int) (model.Post, error) {
 	return *post, err
 }
 
-func FindPosts(offset int) ([]model.Post, error) {
+func FindPosts(ctx context.Context, offset int) ([]model.Post, error) {
 	var posts []model.Post
 
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
-		context.Background(),
+		ctx,
 		"SELECT * FROM posts ORDER BY created_at desc LIMIT 5 OFFSET $1",
 		offset,
 	)
@@ -83,12 +83,12 @@ func FindPosts(offset int) ([]model.Post, error) {
 	return posts, nil
 }
 
-func FindCommentByID(commentID int) (model.Comment, error) {
+func FindCommentByID(ctx context.Context, commentID int) (model.Comment, error) {
 	comment := &model.Comment{}
 	connection := commonPostgres.GetDatabase()
 
 	err := connection.QueryRow(
-		context.Background(),
+		ctx,
 		"SELECT id, post_id, username, message, created_at, updated_at, active FROM posts WHERE post_id = $1",
 		commentID,
 	).Scan(
@@ -104,12 +104,12 @@ func FindCommentByID(commentID int) (model.Comment, error) {
 	return *comment, err
 }
 
-func FindLikeByID(likeID int) (model.Like, error) {
+func FindLikeByID(ctx context.Context, likeID int) (model.Like, error) {
 	like := &model.Like{}
 	connection := commonPostgres.GetDatabase()
 
 	err := connection.QueryRow(
-		context.Background(),
+		ctx,
 		"SELECT id, post_id, username, created_at, updated_at, active FROM posts WHERE post_id = $1",
 		likeID,
 	).Scan(
@@ -119,13 +119,13 @@ func FindLikeByID(likeID int) (model.Like, error) {
 	return *like, err
 }
 
-func FindCommentsForPost(postID int) ([]model.Comment, error) {
+func FindCommentsForPost(ctx context.Context, postID int) ([]model.Comment, error) {
 	var comments []model.Comment
 
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
-		context.Background(),
+		ctx,
 		"SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at desc",
 		postID,
 	)
@@ -155,13 +155,13 @@ func FindCommentsForPost(postID int) ([]model.Comment, error) {
 	return comments, nil
 }
 
-func FindLikesForPost(postID int) ([]model.Like, error) {
+func FindLikesForPost(ctx context.Context, postID int) ([]model.Like, error) {
 	var likes []model.Like
 
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
-		context.Background(),
+		ctx,
 		"SELECT * FROM likes WHERE post_id = $1 ORDER BY created_at desc",
 		postID,
 	)

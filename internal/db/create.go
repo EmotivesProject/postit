@@ -11,14 +11,14 @@ import (
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 )
 
-func CreateUser(username string) (*model.User, error) {
+func CreateUser(ctx context.Context, username string) (*model.User, error) {
 	user := model.User{
 		Username: username,
 	}
 
 	connection := commonPostgres.GetDatabase()
 	_, err := connection.Exec(
-		context.TODO(),
+		ctx,
 		"INSERT INTO users(username) VALUES ($1)",
 		user.Username,
 	)
@@ -26,7 +26,7 @@ func CreateUser(username string) (*model.User, error) {
 	return &user, err
 }
 
-func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
+func CreatePost(ctx context.Context, body io.ReadCloser, username string) (*model.Post, error) {
 	post := model.Post{}
 	jsonMap := make(map[string]interface{})
 
@@ -49,7 +49,7 @@ func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 
 	connection := commonPostgres.GetDatabase()
 	err = connection.QueryRow(
-		context.TODO(),
+		ctx,
 		"INSERT INTO posts(username,content,created_at,updated_at,active) VALUES ($1,$2,$3,$4,$5) RETURNING id",
 		post.Username,
 		post.Content,
@@ -63,7 +63,7 @@ func CreatePost(body io.ReadCloser, username string) (*model.Post, error) {
 	return &post, err
 }
 
-func CreateComment(body io.ReadCloser, username string, postID int) (*model.Comment, error) {
+func CreateComment(ctx context.Context, body io.ReadCloser, username string, postID int) (*model.Comment, error) {
 	comment := model.Comment{}
 
 	err := json.NewDecoder(body).Decode(&comment)
@@ -79,7 +79,7 @@ func CreateComment(body io.ReadCloser, username string, postID int) (*model.Comm
 
 	connection := commonPostgres.GetDatabase()
 	err = connection.QueryRow(
-		context.TODO(),
+		ctx,
 		"INSERT INTO comments(post_id,username,message,created_at,updated_at,active) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id",
 		comment.PostID,
 		comment.Username,
@@ -94,7 +94,7 @@ func CreateComment(body io.ReadCloser, username string, postID int) (*model.Comm
 	return &comment, err
 }
 
-func CreateLike(username string, postID int) (*model.Like, error) {
+func CreateLike(ctx context.Context, username string, postID int) (*model.Like, error) {
 	like := model.Like{
 		Username:  username,
 		PostID:    postID,
@@ -105,7 +105,7 @@ func CreateLike(username string, postID int) (*model.Like, error) {
 
 	connection := commonPostgres.GetDatabase()
 	err := connection.QueryRow(
-		context.TODO(),
+		ctx,
 		"INSERT INTO likes(post_id,username,created_at,updated_at,active) VALUES ($1,$2,$3,$4,$5) RETURNING id",
 		postID,
 		username,
