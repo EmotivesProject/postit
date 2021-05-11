@@ -26,7 +26,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(username)
+	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
@@ -35,6 +35,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post, err := db.CreatePost(
+		r.Context(),
 		r.Body,
 		username,
 	)
@@ -58,7 +59,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(username)
+	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
@@ -77,6 +78,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment, err := db.CreateComment(
+		r.Context(),
 		r.Body,
 		username,
 		postID,
@@ -88,7 +90,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(postID)
+	post, err := db.FindPostByID(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 	} else if post.Username != username {
@@ -108,7 +110,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(username)
+	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
@@ -127,6 +129,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	like, err := db.CreateLike(
+		r.Context(),
 		username,
 		postID,
 	)
@@ -137,7 +140,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(postID)
+	post, err := db.FindPostByID(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 	} else if post.Username != username {
@@ -157,7 +160,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(username)
+	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
@@ -165,7 +168,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := db.FindByUsername(username)
+	user, err := db.FindByUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -187,7 +190,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(postID)
+	post, err := db.FindPostByID(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -197,7 +200,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 
 	post.Active = false
 
-	err = db.UpdatePost(&post)
+	err = db.UpdatePost(r.Context(), &post)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -221,7 +224,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment, err := db.FindCommentByID(commentID)
+	comment, err := db.FindCommentByID(r.Context(), commentID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -231,7 +234,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 
 	comment.Active = false
 
-	err = db.UpdateComment(&comment)
+	err = db.UpdateComment(r.Context(), &comment)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -255,7 +258,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	like, err := db.FindLikeByID(likeID)
+	like, err := db.FindLikeByID(r.Context(), likeID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -265,7 +268,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 
 	like.Active = false
 
-	err = db.UpdateLike(&like)
+	err = db.UpdateLike(r.Context(), &like)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -284,7 +287,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 
 	var postInformations []model.PostInformation // nolint: prealloc
 
-	posts, err := db.FindPosts(page)
+	posts, err := db.FindPosts(r.Context(), page)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -293,7 +296,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(post.ID)
+		comments, err := db.FindCommentsForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -301,7 +304,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		likes, err := db.FindLikesForPost(post.ID)
+		likes, err := db.FindLikesForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -332,7 +335,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(postID)
+	post, err := db.FindPostByID(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -340,7 +343,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(postID)
+	comments, err := db.FindCommentsForPost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -348,7 +351,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	likes, err := db.FindLikesForPost(postID)
+	likes, err := db.FindLikesForPost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})

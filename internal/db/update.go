@@ -7,11 +7,11 @@ import (
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 )
 
-func UpdatePost(post *model.Post) error {
+func UpdatePost(ctx context.Context, post *model.Post) error {
 	connection := commonPostgres.GetDatabase()
 
 	_, err := connection.Exec(
-		context.TODO(),
+		ctx,
 		"UPDATE post SET active = $1 WHERE post_id = $2",
 		post.Active,
 		post.ID,
@@ -20,11 +20,11 @@ func UpdatePost(post *model.Post) error {
 	return err
 }
 
-func UpdateComment(comment *model.Comment) error {
+func UpdateComment(ctx context.Context, comment *model.Comment) error {
 	connection := commonPostgres.GetDatabase()
 
 	_, err := connection.Exec(
-		context.TODO(),
+		ctx,
 		"UPDATE comment SET active = $1 WHERE comment_id = $2",
 		comment.Active,
 		comment.ID,
@@ -33,11 +33,11 @@ func UpdateComment(comment *model.Comment) error {
 	return err
 }
 
-func UpdateLike(like *model.Like) error {
+func UpdateLike(ctx context.Context, like *model.Like) error {
 	connection := commonPostgres.GetDatabase()
 
 	_, err := connection.Exec(
-		context.TODO(),
+		ctx,
 		"UPDATE like SET active = $1 WHERE like_id = $2",
 		like.Active,
 		like.ID,
