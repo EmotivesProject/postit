@@ -17,7 +17,6 @@ import (
 
 func TestRouterCreatePost(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	fmt.Printf("%d", time.Now().Unix())
 	test.SetUpIntegrationTest()
 
 	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
@@ -36,9 +35,24 @@ func TestRouterCreatePost(t *testing.T) {
 	test.TearDownIntegrationTest()
 }
 
+func TestRouterFromAuth(t *testing.T) {
+	rand.Seed(time.Now().Unix())
+	test.SetUpIntegrationTest()
+
+	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+
+	req, _ := http.NewRequest("GET", test.TS.URL+"/user", nil)
+	req.Header.Add("Authorization", token)
+
+	r, _, _ := commonTest.CompleteTestRequest(t, req)
+
+	assert.EqualValues(t, r.StatusCode, http.StatusOK)
+
+	test.TearDownIntegrationTest()
+}
+
 func TestRouterCreateLike(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	fmt.Printf("%d", time.Now().Unix())
 	test.SetUpIntegrationTest()
 
 	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
@@ -59,7 +73,6 @@ func TestRouterCreateLike(t *testing.T) {
 
 func TestRouterCreateComment(t *testing.T) {
 	rand.Seed(time.Now().Unix())
-	fmt.Printf("%d", time.Now().Unix())
 	test.SetUpIntegrationTest()
 
 	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
