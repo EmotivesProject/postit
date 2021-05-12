@@ -39,7 +39,7 @@ func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
 
 	err := connection.QueryRow(
 		ctx,
-		"SELECT id, username, content, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		"SELECT id, username, content, created_at, updated_at, active FROM posts WHERE id = $1",
 		postID,
 	).Scan(
 		&post.ID, &post.Username, &post.Content, &post.CreatedAt, &post.UpdatedAt, &post.Active,

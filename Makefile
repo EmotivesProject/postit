@@ -1,6 +1,6 @@
 SLEEP_TIME=0
 
-.PHONY: lint test integration start_test_containers integration_dry get_latest_containers destory_test_containers
+.PHONY: lint test integration start_test_containers integration_dry get_latest_containers destory_test_containers stop_test_containers
 
 lint:
 	golangci-lint run
@@ -18,6 +18,9 @@ start_test_containers:
 	make get_latest_containers
 	docker-compose -f docker/postit/docker-compose.test.yml down --remove-orphans
 	docker-compose -f docker/postit/docker-compose.test.yml up -d --remove-orphans
+
+stop_test_containers:
+	docker-compose -f docker/postit/docker-compose.test.yml down --remove-orphans
 
 integration_dry:
 	go test -v -tags=integration ./...
