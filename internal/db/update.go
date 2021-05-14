@@ -12,7 +12,7 @@ func UpdatePost(ctx context.Context, post *model.Post) error {
 
 	_, err := connection.Exec(
 		ctx,
-		"UPDATE post SET active = $1 WHERE post_id = $2",
+		"UPDATE posts SET active = $1 WHERE id = $2",
 		post.Active,
 		post.ID,
 	)
@@ -25,7 +25,7 @@ func UpdateComment(ctx context.Context, comment *model.Comment) error {
 
 	_, err := connection.Exec(
 		ctx,
-		"UPDATE comment SET active = $1 WHERE comment_id = $2",
+		"UPDATE comments SET active = $1 WHERE id = $2",
 		comment.Active,
 		comment.ID,
 	)
@@ -38,7 +38,7 @@ func UpdateLike(ctx context.Context, like *model.Like) error {
 
 	_, err := connection.Exec(
 		ctx,
-		"UPDATE like SET active = $1 WHERE like_id = $2",
+		"UPDATE likes SET active = $1 WHERE id = $2",
 		like.Active,
 		like.ID,
 	)

@@ -89,7 +89,7 @@ func FindCommentByID(ctx context.Context, commentID int) (model.Comment, error) 
 
 	err := connection.QueryRow(
 		ctx,
-		"SELECT id, post_id, username, message, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		"SELECT id, post_id, username, message, created_at, updated_at, active FROM comments WHERE id = $1",
 		commentID,
 	).Scan(
 		&comment.ID,
@@ -110,7 +110,7 @@ func FindLikeByID(ctx context.Context, likeID int) (model.Like, error) {
 
 	err := connection.QueryRow(
 		ctx,
-		"SELECT id, post_id, username, created_at, updated_at, active FROM posts WHERE post_id = $1",
+		"SELECT id, post_id, username, created_at, updated_at, active FROM likes WHERE id = $1",
 		likeID,
 	).Scan(
 		&like.ID, &like.PostID, &like.Username, &like.CreatedAt, &like.UpdatedAt, &like.Active,
