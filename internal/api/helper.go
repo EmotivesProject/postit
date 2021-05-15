@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"strconv"
+
+	"github.com/go-chi/chi"
 )
 
 func findBegin(r *http.Request) int {
@@ -18,4 +20,10 @@ func findBegin(r *http.Request) int {
 	}
 
 	return db.PostLimit * skip
+}
+
+func extractID(r *http.Request, param string) (int, error) {
+	paramString := chi.URLParam(r, param)
+
+	return strconv.Atoi(paramString)
 }

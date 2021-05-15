@@ -22,8 +22,7 @@ func main() {
 	middlewares.Init(middlewares.Config{
 		AllowedOrigin:  "*",
 		AllowedMethods: "GET,POST,DELETE,OPTIONS",
-		// nolint: lll
-		AllowedHeaders: "Accept, Content-Type, Content-Length, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header",
+		AllowedHeaders: "*",
 	})
 
 	router := api.CreateRouter()
