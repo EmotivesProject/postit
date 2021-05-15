@@ -1,21 +1,51 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"postit/internal/db"
 	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
-	"strconv"
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/response"
 	"github.com/TomBowyerResearchProject/common/verification"
-
-	"github.com/go-chi/chi"
 )
 
-var postParam = "post_id"
+var (
+	postParam    = "post_id"
+	likeParam    = "like_id"
+	commentParam = "comment_id"
+)
+
+func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
+	username, ok := r.Context().Value(verification.UserID).(string)
+	if !ok {
+		logger.Error(messages.ErrInvalidCheck)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
+
+		return
+	}
+
+	err := db.CheckUsername(r.Context(), username)
+	if err != nil {
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+
+		return
+	}
+
+	user, err := db.FindByUsername(r.Context(), username)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	response.ResultResponseJSON(w, http.StatusOK, user)
+}
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
@@ -67,9 +97,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postString := chi.URLParam(r, postParam)
-
-	postID, err := strconv.Atoi(postString)
+	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -118,9 +146,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postString := chi.URLParam(r, postParam)
-
-	postID, err := strconv.Atoi(postString)
+	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -151,38 +177,8 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusCreated, like)
 }
 
-func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
-
-		return
-	}
-
-	err := db.CheckUsername(r.Context(), username)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
-
-		return
-	}
-
-	user, err := db.FindByUsername(r.Context(), username)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	response.ResultResponseJSON(w, http.StatusOK, user)
-}
-
 func deletePost(w http.ResponseWriter, r *http.Request) {
-	postString := chi.URLParam(r, postParam)
-
-	postID, err := strconv.Atoi(postString)
+	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -190,17 +186,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(r.Context(), postID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	post.Active = false
-
-	err = db.UpdatePost(r.Context(), &post)
+	post, err := updatePost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -212,11 +198,21 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusOK, post)
 }
 
-// nolint:dupl
+func updatePost(ctx context.Context, postID int) (model.Post, error) {
+	post, err := db.FindPostByID(ctx, postID)
+	if err != nil {
+		return post, err
+	}
+
+	post.Active = false
+
+	err = db.UpdatePost(ctx, &post)
+
+	return post, err
+}
+
 func deleteComment(w http.ResponseWriter, r *http.Request) {
-	commentString := chi.URLParam(r, "comment_id")
-
-	commentID, err := strconv.Atoi(commentString)
+	commentID, err := extractID(r, commentParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -224,17 +220,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment, err := db.FindCommentByID(r.Context(), commentID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	comment.Active = false
-
-	err = db.UpdateComment(r.Context(), &comment)
+	comment, err := updateComment(r.Context(), commentID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -246,11 +232,21 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusOK, comment)
 }
 
-// nolint:dupl
+func updateComment(ctx context.Context, commentID int) (model.Comment, error) {
+	comment, err := db.FindCommentByID(ctx, commentID)
+	if err != nil {
+		return comment, err
+	}
+
+	comment.Active = false
+
+	err = db.UpdateComment(ctx, &comment)
+
+	return comment, err
+}
+
 func deleteLike(w http.ResponseWriter, r *http.Request) {
-	likeString := chi.URLParam(r, "like_id")
-
-	likeID, err := strconv.Atoi(likeString)
+	likeID, err := extractID(r, likeParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -258,17 +254,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	like, err := db.FindLikeByID(r.Context(), likeID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	like.Active = false
-
-	err = db.UpdateLike(r.Context(), &like)
+	like, err := updateLike(r.Context(), likeID)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -280,12 +266,23 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, http.StatusOK, like)
 }
 
-// Next two functions don't just return individual objects, but all the references to it
-// e.g. All the comments and likes.
+func updateLike(ctx context.Context, likeID int) (model.Like, error) {
+	like, err := db.FindLikeByID(ctx, likeID)
+	if err != nil {
+		return like, err
+	}
+
+	like.Active = false
+
+	err = db.UpdateLike(ctx, &like)
+
+	return like, err
+}
+
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	page := findBegin(r)
 
-	var postInformations []model.PostInformation // nolint: prealloc
+	postInformations := make([]model.PostInformation, db.PostLimit)
 
 	posts, err := db.FindPosts(r.Context(), page)
 	if err != nil {
@@ -295,7 +292,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, post := range posts {
+	for i, post := range posts {
 		comments, err := db.FindCommentsForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
@@ -318,16 +315,14 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			Likes:    likes,
 		}
 
-		postInformations = append(postInformations, postInformation)
+		postInformations[i] = postInformation
 	}
 
 	response.ResultResponseJSON(w, http.StatusOK, postInformations)
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
-	postString := chi.URLParam(r, postParam)
-
-	postID, err := strconv.Atoi(postString)
+	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
