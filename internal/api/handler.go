@@ -292,7 +292,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i, post := range posts {
+	for _, post := range posts {
 		comments, err := db.FindCommentsForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
@@ -315,7 +315,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			Likes:    likes,
 		}
 
-		postInformations[i] = postInformation
+		postInformations = append(postInformations, postInformation)
 	}
 
 	response.ResultResponseJSON(w, http.StatusOK, postInformations)

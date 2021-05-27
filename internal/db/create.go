@@ -71,6 +71,10 @@ func CreateComment(ctx context.Context, body io.ReadCloser, username string, pos
 		return &comment, messages.ErrFailedDecoding
 	}
 
+	if comment.Message == "" {
+		return nil, messages.ErrNoMessage
+	}
+
 	comment.PostID = postID
 	comment.Username = username
 	comment.CreatedAt = time.Now()
