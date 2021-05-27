@@ -282,7 +282,7 @@ func updateLike(ctx context.Context, likeID int) (model.Like, error) {
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	page := findBegin(r)
 
-	postInformations := make([]model.PostInformation, db.PostLimit)
+	postInformations := make([]model.PostInformation, 0)
 
 	posts, err := db.FindPosts(r.Context(), page)
 	if err != nil {
