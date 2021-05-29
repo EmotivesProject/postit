@@ -76,8 +76,30 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	comments, err := db.FindCommentsForPost(r.Context(), post.ID)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	likes, err := db.FindLikesForPost(r.Context(), post.ID)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	postInfo := model.PostInformation{
+		Post:     *post,
+		Comments: comments,
+		Likes:    likes,
+	}
+
 	logger.Infof("Successfully created post %s", username)
-	response.ResultResponseJSON(w, http.StatusCreated, post)
+	response.ResultResponseJSON(w, http.StatusCreated, postInfo)
 }
 
 func createComment(w http.ResponseWriter, r *http.Request) {
