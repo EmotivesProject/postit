@@ -6,6 +6,7 @@ import (
 	"io"
 	"postit/messages"
 	"postit/model"
+	"strings"
 	"time"
 
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
@@ -119,6 +120,11 @@ func CreateLike(ctx context.Context, username string, postID int) (*model.Like, 
 	).Scan(
 		&like.ID,
 	)
+	if err != nil { //nolint:wsl
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			like, err = UpdateLikeByUsernameAndPost(ctx, like)
+		}
+	}
 
 	return &like, err
 }
