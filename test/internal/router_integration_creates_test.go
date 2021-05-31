@@ -61,7 +61,7 @@ func TestRouterCreateComment(t *testing.T) {
 	url := fmt.Sprintf("%s/post/%s/comment", test.TS.URL, id)
 
 	requestBody := strings.NewReader(
-		"{\"content\": {\"message\": \"HELLO\"} }",
+		"{\"message\": \"HELLO\"}",
 	)
 
 	req, _ := http.NewRequest("POST", url, requestBody)

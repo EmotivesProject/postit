@@ -58,7 +58,9 @@ func CreatePost(t *testing.T, token string) string {
 	r, resultMap, _ := commonTest.CompleteTestRequest(t, req)
 	r.Body.Close()
 
-	intID := int64(resultMap["id"].(float64))
+	post, _ := resultMap["post"].(map[string]interface{})
+
+	intID := int64(post["id"].(float64))
 
 	return fmt.Sprintf("%d", intID)
 }

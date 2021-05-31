@@ -126,7 +126,7 @@ func FindCommentsForPost(ctx context.Context, postID int) ([]model.Comment, erro
 
 	rows, err := connection.Query(
 		ctx,
-		"SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at desc",
+		"SELECT * FROM comments WHERE post_id = $1 AND active = true ORDER BY created_at desc",
 		postID,
 	)
 	if err != nil {
@@ -162,7 +162,7 @@ func FindLikesForPost(ctx context.Context, postID int) ([]model.Like, error) {
 
 	rows, err := connection.Query(
 		ctx,
-		"SELECT * FROM likes WHERE post_id = $1 ORDER BY created_at desc",
+		"SELECT * FROM likes WHERE post_id = $1 AND active = true  ORDER BY created_at desc",
 		postID,
 	)
 	if err != nil {

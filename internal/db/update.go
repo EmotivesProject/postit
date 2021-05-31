@@ -45,3 +45,19 @@ func UpdateLike(ctx context.Context, like *model.Like) error {
 
 	return err
 }
+
+func UpdateLikeByUsernameAndPost(ctx context.Context, like model.Like) (model.Like, error) {
+	connection := commonPostgres.GetDatabase()
+
+	err := connection.QueryRow(
+		ctx,
+		"UPDATE likes SET active = $1 WHERE post_id = $2 and username = $3 RETURNING id",
+		like.Active,
+		like.PostID,
+		like.Username,
+	).Scan(
+		&like.ID,
+	)
+
+	return like, err
+}
