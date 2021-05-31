@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/TomBowyerResearchProject/common/logger"
 	commonTest "github.com/TomBowyerResearchProject/common/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,7 +43,7 @@ func TestCommentDelete(t *testing.T) {
 	url := fmt.Sprintf("%s/post/%s/comment", test.TS.URL, id)
 
 	requestBody := strings.NewReader(
-		"{\"content\": {\"message\": \"HELLO\"} }",
+		"{\"message\": \"HELLO\" }",
 	)
 
 	req, _ := http.NewRequest("POST", url, requestBody)
@@ -50,6 +51,8 @@ func TestCommentDelete(t *testing.T) {
 
 	r, resultMap, _ := commonTest.CompleteTestRequest(t, req)
 	r.Body.Close()
+
+	logger.Infof("%v", resultMap)
 
 	CommentID := int64(resultMap["id"].(float64))
 
