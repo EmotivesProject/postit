@@ -57,7 +57,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, user)
 }
 
-//Nolint
+//nolint
 func createPost(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
