@@ -26,7 +26,7 @@ func TestHealthz(t *testing.T) {
 func TestRouterFromAuth(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	req, _ := http.NewRequest("GET", test.TS.URL+"/user", nil)
 	req.Header.Add("Authorization", token)

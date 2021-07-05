@@ -15,7 +15,7 @@ import (
 func TestPostGet(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	test.CreatePost(t, token)
 
@@ -34,7 +34,7 @@ func TestPostGet(t *testing.T) {
 func TestPostGetIndividualPost(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 

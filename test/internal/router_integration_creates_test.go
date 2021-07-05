@@ -16,7 +16,7 @@ import (
 func TestRouterCreatePost(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	requestBody := strings.NewReader(
 		"{\"content\": {\"message\": \"HELLO\"} }",
@@ -35,7 +35,7 @@ func TestRouterCreatePost(t *testing.T) {
 func TestRouterCreateLike(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 
@@ -54,7 +54,7 @@ func TestRouterCreateLike(t *testing.T) {
 func TestRouterCreateComment(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 

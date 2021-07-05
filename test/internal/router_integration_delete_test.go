@@ -17,7 +17,7 @@ import (
 func TestPostDeleteIndividual(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 
@@ -36,7 +36,7 @@ func TestPostDeleteIndividual(t *testing.T) {
 func TestCommentDelete(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 
@@ -71,7 +71,7 @@ func TestCommentDelete(t *testing.T) {
 func TestLikeDelete(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	id := test.CreatePost(t, token)
 
