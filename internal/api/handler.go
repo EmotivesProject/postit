@@ -23,7 +23,12 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
 
 		return
 	}
@@ -31,7 +36,12 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
 
 		return
 	}
@@ -47,11 +57,17 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, user)
 }
 
+//Nolint
 func createPost(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
 
 		return
 	}
@@ -59,7 +75,12 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusInternalServerError,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
 
 		return
 	}
@@ -99,6 +120,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Successfully created post %s", username)
+
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
 }
 
@@ -106,7 +128,12 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
 
 		return
 	}
@@ -114,7 +141,12 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusInternalServerError,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
 
 		return
 	}
@@ -155,7 +187,12 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
 
 		return
 	}
@@ -163,7 +200,12 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
 
 		return
 	}
