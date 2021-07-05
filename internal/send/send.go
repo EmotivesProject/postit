@@ -19,7 +19,7 @@ func SendComment(postOwner, newUsername string, postID int) {
 		UsernameTo: &newUsername,
 	}
 
-	err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
+	_, err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
 	if err != nil {
 		logger.Error(err)
 	}
@@ -36,7 +36,7 @@ func SendLike(postOwner, newUsername string, postID int) {
 		UsernameTo: &newUsername,
 	}
 
-	err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
+	_, err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
 	if err != nil {
 		logger.Error(err)
 	}

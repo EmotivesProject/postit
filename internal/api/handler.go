@@ -23,7 +23,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
 
 		return
 	}
@@ -31,7 +31,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 
 		return
 	}
@@ -39,19 +39,19 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	user, err := db.FindByUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
 
-	response.ResultResponseJSON(w, http.StatusOK, user)
+	response.ResultResponseJSON(w, false, http.StatusOK, user)
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
 
 		return
 	}
@@ -59,7 +59,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: messages.ErrInvalidUsername.Error()})
 
 		return
 	}
@@ -71,7 +71,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -79,7 +79,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	comments, err := db.FindCommentsForPost(r.Context(), post.ID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -87,7 +87,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	likes, err := db.FindLikesForPost(r.Context(), post.ID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -99,14 +99,14 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Successfully created post %s", username)
-	response.ResultResponseJSON(w, http.StatusCreated, postInfo)
+	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
 }
 
 func createComment(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
 
 		return
 	}
@@ -114,7 +114,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: messages.ErrInvalidUsername.Error()})
 
 		return
 	}
@@ -122,7 +122,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -135,7 +135,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -148,14 +148,14 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Created comment for %s", username)
-	response.ResultResponseJSON(w, http.StatusCreated, comment)
+	response.ResultResponseJSON(w, false, http.StatusCreated, comment)
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
 		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidCheck.Error()})
+		response.MessageResponseJSON(w, false, http.StatusUnprocessableEntity, response.Message{Message: messages.ErrInvalidCheck.Error()})
 
 		return
 	}
@@ -163,7 +163,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	err := db.CheckUsername(r.Context(), username)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: messages.ErrInvalidUsername.Error()})
 
 		return
 	}
@@ -171,7 +171,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -183,7 +183,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -196,14 +196,14 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infof("Created like for %s", username)
-	response.ResultResponseJSON(w, http.StatusCreated, like)
+	response.ResultResponseJSON(w, false, http.StatusCreated, like)
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -211,13 +211,13 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	post, err := updatePost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
 
 	logger.Infof("Successfully deleted post %d", postID)
-	response.ResultResponseJSON(w, http.StatusOK, post)
+	response.ResultResponseJSON(w, false, http.StatusOK, post)
 }
 
 func updatePost(ctx context.Context, postID int) (model.Post, error) {
@@ -237,7 +237,7 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 	commentID, err := extractID(r, commentParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -245,13 +245,13 @@ func deleteComment(w http.ResponseWriter, r *http.Request) {
 	comment, err := updateComment(r.Context(), commentID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
 
 	logger.Infof("Successfully deleted comment %d", commentID)
-	response.ResultResponseJSON(w, http.StatusOK, comment)
+	response.ResultResponseJSON(w, false, http.StatusOK, comment)
 }
 
 func updateComment(ctx context.Context, commentID int) (model.Comment, error) {
@@ -271,7 +271,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	likeID, err := extractID(r, likeParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -279,13 +279,13 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	like, err := updateLike(r.Context(), likeID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
 
 	logger.Infof("Successfully deleted like %d", likeID)
-	response.ResultResponseJSON(w, http.StatusOK, like)
+	response.ResultResponseJSON(w, false, http.StatusOK, like)
 }
 
 func updateLike(ctx context.Context, likeID int) (model.Like, error) {
@@ -309,7 +309,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	posts, err := db.FindPosts(r.Context(), page)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -318,7 +318,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		comments, err := db.FindCommentsForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
-			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 			return
 		}
@@ -326,7 +326,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		likes, err := db.FindLikesForPost(r.Context(), post.ID)
 		if err != nil {
 			logger.Error(err)
-			response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 			return
 		}
@@ -340,14 +340,14 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		postInformations = append(postInformations, postInformation)
 	}
 
-	response.ResultResponseJSON(w, http.StatusOK, postInformations)
+	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -355,7 +355,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	post, err := db.FindPostByID(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -363,7 +363,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	comments, err := db.FindCommentsForPost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -371,7 +371,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	likes, err := db.FindLikesForPost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
-		response.MessageResponseJSON(w, http.StatusBadRequest, response.Message{Message: err.Error()})
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
 
 		return
 	}
@@ -382,5 +382,5 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		Likes:    likes,
 	}
 
-	response.ResultResponseJSON(w, http.StatusOK, postInfo)
+	response.ResultResponseJSON(w, false, http.StatusOK, postInfo)
 }
