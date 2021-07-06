@@ -97,7 +97,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), post.ID)
+	comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -357,7 +357,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(r.Context(), post.ID)
+		comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -385,6 +385,31 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
 }
 
+func getCommentsForPost(w http.ResponseWriter, r *http.Request) {
+	postID, err := extractID(r, postParam)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	commentsInformation := model.CommentsInformation{
+		PostID:   postID,
+		Comments: comments,
+	}
+
+	response.ResultResponseJSON(w, false, http.StatusOK, commentsInformation)
+}
+
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
@@ -402,7 +427,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), postID)
+	comments, err := db.FindCommentsForPost(r.Context(), postID, false)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
