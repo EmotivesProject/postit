@@ -119,14 +119,22 @@ func FindLikeByID(ctx context.Context, likeID int) (model.Like, error) {
 	return *like, err
 }
 
-func FindCommentsForPost(ctx context.Context, postID int) ([]model.Comment, error) {
+func FindCommentsForPost(ctx context.Context, postID int, full bool) ([]model.Comment, error) {
 	var comments []model.Comment
 
 	connection := commonPostgres.GetDatabase()
 
+	var query string
+
+	if full {
+		query = "SELECT * FROM comments WHERE post_id = $1 AND active = true ORDER BY created_at desc"
+	} else {
+		query = "SELECT * FROM comments WHERE post_id = $1 AND active = true ORDER BY created_at desc LIMIT 3"
+	}
+
 	rows, err := connection.Query(
 		ctx,
-		"SELECT * FROM comments WHERE post_id = $1 AND active = true ORDER BY created_at desc",
+		query,
 		postID,
 	)
 	if err != nil {
