@@ -12,6 +12,8 @@ services:
       EMOTIVES_URL: http://emotives.net/
       HOST: 0.0.0.0
       PORT: 80
+    logging:
+      driver: syslog
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.emotives.net`)"
