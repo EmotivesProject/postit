@@ -48,6 +48,8 @@ github.com/TomBowyerResearchProject/common/verification v0.0.0-20210502204851-4a
 github.com/TomBowyerResearchProject/common/verification v0.0.0-20210502204851-4aaa9f3a3338/go.mod h1:qnY0WQTBN7MfFrR6jaCwsJxhSFiTLDnoleOMuHK6RYg=
 github.com/TomBowyerResearchProject/common/verification v0.0.0-20210705095908-154760228061 h1:QJMyOJiYn5cWuiqlapqcTf4ni7D1oF1u+vBGm9fB77c=
 github.com/TomBowyerResearchProject/common/verification v0.0.0-20210705095908-154760228061/go.mod h1:YPfkh9+X2otzcpoLCXG55wWDExoPpUe70jROtADGKVw=
+github.com/TomBowyerResearchProject/common/verification v0.0.0-20210709105607-257260c9085d h1:RLA2534z3Bv4mZkn6DNTWzkBTRx8MJOiqHSaB3QaHoo=
+github.com/TomBowyerResearchProject/common/verification v0.0.0-20210709105607-257260c9085d/go.mod h1:YPfkh9+X2otzcpoLCXG55wWDExoPpUe70jROtADGKVw=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
