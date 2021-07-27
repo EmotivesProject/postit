@@ -36,6 +36,8 @@ func SendLike(postOwner, newUsername string, postID int) {
 		UsernameTo: &newUsername,
 	}
 
+	logger.Infof("%s", os.Getenv("NOTIFICATION_URL"))
+
 	_, err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
 	if err != nil {
 		logger.Error(err)
