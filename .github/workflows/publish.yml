@@ -9,7 +9,8 @@ jobs:
   build-and-push-image:
     # this job will only run if the PR has been merged
     if: github.event.pull_request.merged == true
-    runs-on: self-hosted
+    # runs-on: self-hosted (Temp to run on github server while my server is down)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
         with:

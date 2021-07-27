@@ -8,7 +8,7 @@ services:
     environment:
       DATABASE_URL: postgres://tom:tom123@postgres_db:5432/postit_db
       VERIFICATION_URL: http://uacl/authorize
-      NOTIFICATION_URL: http://notif/notification
+      NOTIFICATION_URL: http://notif/internal_notification
       EMOTIVES_URL: http://emotives.net/
       HOST: 0.0.0.0
       PORT: 80
