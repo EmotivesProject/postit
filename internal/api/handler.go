@@ -176,7 +176,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(err)
 	} else if post.Username != username {
-		send.SendComment(post.Username, username, post.ID)
+		send.Comment(post.Username, username, post.ID)
 	}
 
 	logger.Infof("Created comment for %s", username)
@@ -234,7 +234,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error(err)
 	} else if post.Username != username {
-		send.SendLike(post.Username, username, post.ID)
+		send.Like(post.Username, username, post.ID)
 	}
 
 	logger.Infof("Created like for %s", username)

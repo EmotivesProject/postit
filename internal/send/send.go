@@ -8,7 +8,7 @@ import (
 	"github.com/TomBowyerResearchProject/common/notification"
 )
 
-func SendComment(postOwner, newUsername string, postID int) {
+func Comment(postOwner, newUsername string, postID int) {
 	notif := notification.Notification{
 		Username:   postOwner,
 		Type:       notification.Comment,
@@ -25,7 +25,7 @@ func SendComment(postOwner, newUsername string, postID int) {
 	}
 }
 
-func SendLike(postOwner, newUsername string, postID int) {
+func Like(postOwner, newUsername string, postID int) {
 	notif := notification.Notification{
 		Username:   postOwner,
 		Type:       notification.Comment,
@@ -35,8 +35,6 @@ func SendLike(postOwner, newUsername string, postID int) {
 		PostID:     &postID,
 		UsernameTo: &newUsername,
 	}
-
-	logger.Infof("%s", os.Getenv("NOTIFICATION_URL"))
 
 	_, err := notification.SendEvent(os.Getenv("NOTIFICATION_URL"), os.Getenv("NOTIFICATION_AUTH"), notif)
 	if err != nil {

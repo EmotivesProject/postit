@@ -12,7 +12,7 @@ services:
       DATABASE_URL: postgres://tom:tom123@postgres_db:5432/postit_db
       VERIFICATION_URL: http://uacl/authorize
       NOTIFICATION_URL: http://notif/internal_notification
-      EMOTIVES_URL: http://emotives.net/
+      EMOTIVES_URL: http://localhost/
       NOTIFICATION_AUTH: qutSecret
       HOST: 0.0.0.0
       PORT: 80
