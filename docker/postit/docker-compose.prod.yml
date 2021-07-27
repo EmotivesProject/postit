@@ -10,6 +10,7 @@ services:
       VERIFICATION_URL: http://uacl/authorize
       NOTIFICATION_URL: http://notif/internal_notification
       EMOTIVES_URL: http://emotives.net/
+      NOTIFICATION_AUTH: qutSecret
       HOST: 0.0.0.0
       PORT: 80
     logging:
