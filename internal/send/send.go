@@ -28,9 +28,9 @@ func Comment(postOwner, newUsername string, postID int) {
 func Like(postOwner, newUsername string, postID int) {
 	notif := notification.Notification{
 		Username:   postOwner,
-		Type:       notification.Comment,
+		Type:       notification.Like,
 		Title:      "New like!",
-		Message:    fmt.Sprintf("%s commented on your post", newUsername),
+		Message:    fmt.Sprintf("%s liked your post", newUsername),
 		Link:       fmt.Sprintf("%spost/%d", os.Getenv("EMOTIVES_URL"), postID),
 		PostID:     &postID,
 		UsernameTo: &newUsername,
