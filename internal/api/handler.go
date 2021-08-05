@@ -385,6 +385,20 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
 }
 
+func fetchJustPosts(w http.ResponseWriter, r *http.Request) {
+	page := findBegin(r)
+
+	posts, err := db.FindPosts(r.Context(), page)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	response.ResultResponseJSON(w, false, http.StatusOK, posts)
+}
+
 func getCommentsForPost(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
