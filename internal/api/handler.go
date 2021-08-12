@@ -105,6 +105,8 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	emojiCounts := createEmojiCountsFromComments(comments)
+
 	likes, err := db.FindLikesForPost(r.Context(), post.ID)
 	if err != nil {
 		logger.Error(err)
@@ -114,9 +116,10 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postInfo := model.PostInformation{
-		Post:     *post,
-		Comments: comments,
-		Likes:    likes,
+		Post:       *post,
+		Comments:   comments,
+		EmojiCount: emojiCounts,
+		Likes:      likes,
 	}
 
 	logger.Infof("Successfully created post %s", username)
@@ -373,10 +376,13 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		emojiCounts := createEmojiCountsFromComments(comments)
+
 		postInformation := model.PostInformation{
-			Post:     post,
-			Comments: comments,
-			Likes:    likes,
+			Post:       post,
+			Comments:   comments,
+			EmojiCount: emojiCounts,
+			Likes:      likes,
 		}
 
 		postInformations = append(postInformations, postInformation)
@@ -449,6 +455,8 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	emojiCounts := createEmojiCountsFromComments(comments)
+
 	likes, err := db.FindLikesForPost(r.Context(), postID)
 	if err != nil {
 		logger.Error(err)
@@ -458,10 +466,46 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postInfo := model.PostInformation{
-		Post:     post,
-		Comments: comments,
-		Likes:    likes,
+		Post:       post,
+		Comments:   comments,
+		EmojiCount: emojiCounts,
+		Likes:      likes,
 	}
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInfo)
+}
+
+func createEmojiCountsFromComments(comments []model.Comment) []model.EmojiCount {
+	counts := make([]model.EmojiCount, 0)
+
+	var totalString string
+
+	for _, v := range comments {
+		totalString += v.Message
+	}
+
+	for _, individualEmoji := range totalString {
+		i := exists(counts, string(individualEmoji))
+		if i == -1 {
+			newCount := model.EmojiCount{
+				Emoji: string(individualEmoji),
+				Count: 1,
+			}
+			counts = append(counts, newCount)
+		} else {
+			counts[i].Count++
+		}
+	}
+
+	return counts
+}
+
+func exists(current []model.EmojiCount, needle string) int {
+	for i, count := range current {
+		if count.Emoji == needle {
+			return i
+		}
+	}
+
+	return -1
 }

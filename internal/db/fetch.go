@@ -49,7 +49,7 @@ func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
 }
 
 func FindPosts(ctx context.Context, offset int) ([]model.Post, error) {
-	var posts []model.Post
+	posts := make([]model.Post, 0)
 
 	connection := commonPostgres.GetDatabase()
 
@@ -120,7 +120,7 @@ func FindLikeByID(ctx context.Context, likeID int) (model.Like, error) {
 }
 
 func FindCommentsForPost(ctx context.Context, postID int, full bool) ([]model.Comment, error) {
-	var comments []model.Comment
+	comments := make([]model.Comment, 0)
 
 	connection := commonPostgres.GetDatabase()
 
@@ -164,7 +164,7 @@ func FindCommentsForPost(ctx context.Context, postID int, full bool) ([]model.Co
 }
 
 func FindLikesForPost(ctx context.Context, postID int) ([]model.Like, error) {
-	var likes []model.Like
+	likes := make([]model.Like, 0)
 
 	connection := commonPostgres.GetDatabase()
 
