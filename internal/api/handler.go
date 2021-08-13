@@ -97,7 +97,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
+	comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -360,7 +360,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
+		comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -447,7 +447,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), postID, false)
+	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
