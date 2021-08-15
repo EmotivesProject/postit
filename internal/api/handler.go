@@ -7,6 +7,7 @@ import (
 	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
+	"sort"
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/response"
@@ -496,6 +497,10 @@ func createEmojiCountsFromComments(comments []model.Comment) []model.EmojiCount 
 			counts[i].Count++
 		}
 	}
+
+	sort.Slice(counts, func(i, j int) bool {
+		return counts[i].Count > counts[j].Count
+	})
 
 	return counts
 }
