@@ -7,6 +7,7 @@ import (
 	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
+	"sort"
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/response"
@@ -97,7 +98,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
+	comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -360,7 +361,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(r.Context(), post.ID, false)
+		comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -447,7 +448,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), postID, false)
+	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -496,6 +497,10 @@ func createEmojiCountsFromComments(comments []model.Comment) []model.EmojiCount 
 			counts[i].Count++
 		}
 	}
+
+	sort.Slice(counts, func(i, j int) bool {
+		return counts[i].Count > counts[j].Count
+	})
 
 	return counts
 }
