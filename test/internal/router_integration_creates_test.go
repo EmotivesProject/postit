@@ -19,7 +19,7 @@ func TestRouterCreatePost(t *testing.T) {
 	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
 
 	requestBody := strings.NewReader(
-		"{\"content\": {\"message\": \"HELLO\"} }",
+		"{\"content\": {\"reaction\": \"😊\"} }",
 	)
 
 	req, _ := http.NewRequest("POST", test.TS.URL+"/post", requestBody)
@@ -61,7 +61,7 @@ func TestRouterCreateComment(t *testing.T) {
 	url := fmt.Sprintf("%s/post/%s/comment", test.TS.URL, id)
 
 	requestBody := strings.NewReader(
-		"{\"message\": \"HELLO\"}",
+		"{\"message\": \"😊\"}",
 	)
 
 	req, _ := http.NewRequest("POST", url, requestBody)

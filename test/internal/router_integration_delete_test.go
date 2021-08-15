@@ -43,7 +43,7 @@ func TestCommentDelete(t *testing.T) {
 	url := fmt.Sprintf("%s/post/%s/comment", test.TS.URL, id)
 
 	requestBody := strings.NewReader(
-		"{\"message\": \"HELLO\" }",
+		"{\"message\": \"😊\" }",
 	)
 
 	req, _ := http.NewRequest("POST", url, requestBody)

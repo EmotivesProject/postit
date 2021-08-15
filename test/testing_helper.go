@@ -49,7 +49,7 @@ func TearDownIntegrationTest() {
 
 func CreatePost(t *testing.T, token string) string {
 	requestBody := strings.NewReader(
-		"{\"content\": {\"message\": \"HELLO\"} }",
+		"{\"content\": {\"reaction\": \"😊\"} }",
 	)
 
 	req, _ := http.NewRequest("POST", TS.URL+"/post", requestBody)

@@ -39,7 +39,6 @@ linters:
   - nestif
   - nilerr
   - nlreturn
-  - nolintlint
   - prealloc
   - revive
   - testpackage
