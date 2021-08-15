@@ -131,6 +131,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
 }
 
+// nolint
 func createComment(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
@@ -166,7 +167,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment, err := db.CreateComment(
+	_, err = db.CreateComment(
 		r.Context(),
 		r.Body,
 		username,
@@ -186,8 +187,36 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		send.Comment(post.Username, username, post.ID)
 	}
 
+	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	emojiCounts := createEmojiCountsFromComments(comments)
+
+	selfEmojiCounts := createSelfEmojiCount(comments, username)
+
+	likes, err := db.FindLikesForPost(r.Context(), postID)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	postInfo := model.PostInformation{
+		Post:           post,
+		Comments:       comments,
+		EmojiCount:     emojiCounts,
+		SelfEmojiCount: selfEmojiCounts,
+		Likes:          likes,
+	}
+
 	logger.Infof("Created comment for %s", username)
-	response.ResultResponseJSON(w, false, http.StatusCreated, comment)
+	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
