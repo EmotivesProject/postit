@@ -7,7 +7,10 @@ import (
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 )
 
-const PostLimit = 5
+const (
+	PostLimit    = 5
+	ExploreBound = 2
+)
 
 func CheckUsername(ctx context.Context, username string) error {
 	_, err := FindByUsername(ctx, username)
@@ -56,6 +59,52 @@ func FindPosts(ctx context.Context, offset int) ([]model.Post, error) {
 	rows, err := connection.Query(
 		ctx,
 		"SELECT * FROM posts ORDER BY created_at desc LIMIT 5 OFFSET $1",
+		offset,
+	)
+	if err != nil {
+		return posts, err
+	}
+
+	for rows.Next() {
+		var post model.Post
+
+		err := rows.Scan(
+			&post.ID,
+			&post.Username,
+			&post.Content,
+			&post.CreatedAt,
+			&post.UpdatedAt,
+			&post.Active,
+		)
+		if err != nil {
+			continue
+		}
+
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func FindPostsBasedOnLatAndLng(ctx context.Context, lat, lng float64, offset int) ([]model.Post, error) {
+	posts := make([]model.Post, 0)
+
+	connection := commonPostgres.GetDatabase()
+
+	minLng := lng - ExploreBound
+	maxLng := lng + ExploreBound
+
+	minLat := lat - ExploreBound
+	maxLat := lat + ExploreBound
+
+	rows, err := connection.Query(
+		ctx,
+		// nolint
+		"SELECT * FROM posts where (content->'latitude')::float < $1 AND (content->'latitude')::float > $2 AND (content->'longitude')::float < $3 AND (content->'longitude')::float > $4 ORDER BY created_at desc LIMIT 5 OFFSET $5",
+		maxLat,
+		minLat,
+		maxLng,
+		minLng,
 		offset,
 	)
 	if err != nil {
