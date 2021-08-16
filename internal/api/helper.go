@@ -22,6 +22,20 @@ func findBegin(r *http.Request) int {
 	return db.PostLimit * skip
 }
 
+func findPosition(r *http.Request, param string) float64 {
+	urlParam := r.URL.Query().Get(param)
+	if urlParam == "" {
+		urlParam = "0"
+	}
+
+	value, err := strconv.ParseFloat(urlParam, 64)
+	if err != nil {
+		return 0
+	}
+
+	return value
+}
+
 func extractID(r *http.Request, param string) (int, error) {
 	paramString := chi.URLParam(r, param)
 

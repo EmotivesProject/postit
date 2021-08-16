@@ -379,6 +379,80 @@ func updateLike(ctx context.Context, likeID int) (model.Like, error) {
 	return like, err
 }
 
+// nolint
+func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
+	username, ok := r.Context().Value(verification.UserID).(string)
+	if !ok {
+		logger.Error(messages.ErrInvalidCheck)
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
+
+		return
+	}
+
+	lat := findPosition(r, "lat")
+	lng := findPosition(r, "lng")
+
+	if lat == 0 || lng == 0 {
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusUnprocessableEntity,
+			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
+	}
+
+	page := findBegin(r)
+
+	postInformations := make([]model.PostInformation, 0)
+
+	posts, err := db.FindPostsBasedOnLatAndLng(r.Context(), lat, lng, page)
+	if err != nil {
+		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	for _, post := range posts {
+		comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
+		if err != nil {
+			logger.Error(err)
+			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+			return
+		}
+
+		likes, err := db.FindLikesForPost(r.Context(), post.ID)
+		if err != nil {
+			logger.Error(err)
+			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+			return
+		}
+
+		emojiCounts := createEmojiCountsFromComments(comments)
+
+		selfEmojiCounts := createSelfEmojiCount(comments, username)
+
+		postInformation := model.PostInformation{
+			Post:           post,
+			Comments:       comments,
+			EmojiCount:     emojiCounts,
+			SelfEmojiCount: selfEmojiCounts,
+			Likes:          likes,
+		}
+
+		postInformations = append(postInformations, postInformation)
+	}
+
+	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
+}
+
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {

@@ -21,6 +21,10 @@ func CreateRouter() http.Handler {
 			r.With(verification.VerifyJTW()).Get("/", fetchUserFromAuth)
 		})
 
+		r.With(verification.VerifyJTW()).Route("/explore_search", func(r chi.Router) {
+			r.Get("/", fetchExplorePosts)
+		})
+
 		r.With(verification.VerifyJTW()).Route("/post", func(r chi.Router) {
 			r.Post("/", createPost)
 			r.Get("/", fetchPosts)
