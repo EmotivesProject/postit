@@ -15,7 +15,7 @@ import (
 func TestPostGet(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, test.UaclUserEndpoint)
 
 	test.CreatePost(t, token)
 
@@ -34,30 +34,11 @@ func TestPostGet(t *testing.T) {
 func TestPostGetIndividualPost(t *testing.T) {
 	test.SetUpIntegrationTest()
 
-	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
+	_, token := commonTest.CreateNewUser(t, test.UaclUserEndpoint)
 
 	id := test.CreatePost(t, token)
 
 	url := fmt.Sprintf("%s/post/%s/", test.TS.URL, id)
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", token)
-
-	r, _, _ := commonTest.CompleteTestRequest(t, req)
-
-	assert.EqualValues(t, r.StatusCode, http.StatusOK)
-
-	test.TearDownIntegrationTest()
-}
-
-func TestPostGetIndividualComments(t *testing.T) {
-	test.SetUpIntegrationTest()
-
-	_, token := commonTest.CreateNewUser(t, "http://0.0.0.0:8082/user")
-
-	id := test.CreatePost(t, token)
-
-	url := fmt.Sprintf("%s/post/%s/comment", test.TS.URL, id)
 
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", token)

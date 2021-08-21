@@ -28,7 +28,6 @@ func CreateRouter() http.Handler {
 		r.With(verification.VerifyJTW()).Route("/post", func(r chi.Router) {
 			r.Post("/", createPost)
 			r.Get("/", fetchPosts)
-			r.Get("/only_posts", fetchJustPosts)
 
 			r.Route("/{post_id}", func(r chi.Router) {
 				r.Get("/", fetchIndividualPost)
@@ -43,11 +42,7 @@ func CreateRouter() http.Handler {
 				})
 
 				r.Route("/comment", func(r chi.Router) {
-					r.Get("/", getCommentsForPost)
 					r.Post("/", createComment)
-					r.Route("/{comment_id}", func(r chi.Router) {
-						r.Delete("/", deleteComment)
-					})
 				})
 			})
 		})
