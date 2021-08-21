@@ -20,19 +20,6 @@ func UpdatePost(ctx context.Context, post *model.Post) error {
 	return err
 }
 
-func UpdateComment(ctx context.Context, comment *model.Comment) error {
-	connection := commonPostgres.GetDatabase()
-
-	_, err := connection.Exec(
-		ctx,
-		"UPDATE comments SET active = $1 WHERE id = $2",
-		comment.Active,
-		comment.ID,
-	)
-
-	return err
-}
-
 func UpdateLike(ctx context.Context, like *model.Like) error {
 	connection := commonPostgres.GetDatabase()
 

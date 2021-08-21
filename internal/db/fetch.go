@@ -99,8 +99,10 @@ func FindPostsBasedOnLatAndLng(ctx context.Context, lat, lng float64, offset int
 
 	rows, err := connection.Query(
 		ctx,
-		// nolint
-		"SELECT * FROM posts where (content->'latitude')::float < $1 AND (content->'latitude')::float > $2 AND (content->'longitude')::float < $3 AND (content->'longitude')::float > $4 ORDER BY created_at desc LIMIT 5 OFFSET $5",
+		`SELECT * FROM posts
+		WHERE (content->'latitude')::float < $1 AND (content->'latitude')::float > $2
+		AND (content->'longitude')::float < $3 AND (content->'longitude')::float > $4
+		ORDER BY created_at desc LIMIT 5 OFFSET $5`,
 		maxLat,
 		minLat,
 		maxLng,
@@ -130,27 +132,6 @@ func FindPostsBasedOnLatAndLng(ctx context.Context, lat, lng float64, offset int
 	}
 
 	return posts, nil
-}
-
-func FindCommentByID(ctx context.Context, commentID int) (model.Comment, error) {
-	comment := &model.Comment{}
-	connection := commonPostgres.GetDatabase()
-
-	err := connection.QueryRow(
-		ctx,
-		"SELECT id, post_id, username, message, created_at, updated_at, active FROM comments WHERE id = $1",
-		commentID,
-	).Scan(
-		&comment.ID,
-		&comment.PostID,
-		&comment.Username,
-		&comment.Message,
-		&comment.CreatedAt,
-		&comment.UpdatedAt,
-		&comment.Active,
-	)
-
-	return *comment, err
 }
 
 func FindLikeByID(ctx context.Context, likeID int) (model.Like, error) {

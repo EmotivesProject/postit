@@ -7,7 +7,6 @@ import (
 	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
-	"sort"
 
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/response"
@@ -15,9 +14,8 @@ import (
 )
 
 var (
-	postParam    = "post_id"
-	likeParam    = "like_id"
-	commentParam = "comment_id"
+	postParam = "post_id"
+	likeParam = "like_id"
 )
 
 func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +56,6 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, user)
 }
 
-//nolint
 func createPost(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
@@ -98,40 +95,19 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
+	postInformation, err := createPostInformation(r.Context(), *post, username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
-	}
-
-	emojiCounts := createEmojiCountsFromComments(comments)
-
-	selfEmojiCounts := createSelfEmojiCount(comments, username)
-
-	likes, err := db.FindLikesForPost(r.Context(), post.ID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	postInfo := model.PostInformation{
-		Post:           *post,
-		Comments:       comments,
-		EmojiCount:     emojiCounts,
-		SelfEmojiCount: selfEmojiCounts,
-		Likes:          likes,
 	}
 
 	logger.Infof("Successfully created post %s", username)
 
-	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
+	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
-// nolint
 func createComment(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
@@ -180,14 +156,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(r.Context(), postID)
-	if err != nil {
-		logger.Error(err)
-	} else if post.Username != username {
-		send.Comment(post.Username, username, post.ID)
-	}
-
-	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
+	postInformation, err := createPostInformationWithFetchPosts(r.Context(), postID, username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -195,28 +164,8 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emojiCounts := createEmojiCountsFromComments(comments)
-
-	selfEmojiCounts := createSelfEmojiCount(comments, username)
-
-	likes, err := db.FindLikesForPost(r.Context(), postID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	postInfo := model.PostInformation{
-		Post:           post,
-		Comments:       comments,
-		EmojiCount:     emojiCounts,
-		SelfEmojiCount: selfEmojiCounts,
-		Likes:          likes,
-	}
-
 	logger.Infof("Created comment for %s", username)
-	response.ResultResponseJSON(w, false, http.StatusCreated, postInfo)
+	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
@@ -277,6 +226,19 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusCreated, like)
 }
 
+func updatePost(ctx context.Context, postID int) (model.Post, error) {
+	post, err := db.FindPostByID(ctx, postID)
+	if err != nil {
+		return post, err
+	}
+
+	post.Active = false
+
+	err = db.UpdatePost(ctx, &post)
+
+	return post, err
+}
+
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	postID, err := extractID(r, postParam)
 	if err != nil {
@@ -298,51 +260,17 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, post)
 }
 
-func updatePost(ctx context.Context, postID int) (model.Post, error) {
-	post, err := db.FindPostByID(ctx, postID)
+func updateLike(ctx context.Context, likeID int) (model.Like, error) {
+	like, err := db.FindLikeByID(ctx, likeID)
 	if err != nil {
-		return post, err
+		return like, err
 	}
 
-	post.Active = false
+	like.Active = false
 
-	err = db.UpdatePost(ctx, &post)
+	err = db.UpdateLike(ctx, &like)
 
-	return post, err
-}
-
-func deleteComment(w http.ResponseWriter, r *http.Request) {
-	commentID, err := extractID(r, commentParam)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	comment, err := updateComment(r.Context(), commentID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	logger.Infof("Successfully deleted comment %d", commentID)
-	response.ResultResponseJSON(w, false, http.StatusOK, comment)
-}
-
-func updateComment(ctx context.Context, commentID int) (model.Comment, error) {
-	comment, err := db.FindCommentByID(ctx, commentID)
-	if err != nil {
-		return comment, err
-	}
-
-	comment.Active = false
-
-	err = db.UpdateComment(ctx, &comment)
-
-	return comment, err
+	return like, err
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
@@ -366,20 +294,6 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, like)
 }
 
-func updateLike(ctx context.Context, likeID int) (model.Like, error) {
-	like, err := db.FindLikeByID(ctx, likeID)
-	if err != nil {
-		return like, err
-	}
-
-	like.Active = false
-
-	err = db.UpdateLike(ctx, &like)
-
-	return like, err
-}
-
-// nolint
 func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
@@ -419,7 +333,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
+		postInformation, err := createPostInformation(r.Context(), post, username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -427,27 +341,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		likes, err := db.FindLikesForPost(r.Context(), post.ID)
-		if err != nil {
-			logger.Error(err)
-			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-			return
-		}
-
-		emojiCounts := createEmojiCountsFromComments(comments)
-
-		selfEmojiCounts := createSelfEmojiCount(comments, username)
-
-		postInformation := model.PostInformation{
-			Post:           post,
-			Comments:       comments,
-			EmojiCount:     emojiCounts,
-			SelfEmojiCount: selfEmojiCounts,
-			Likes:          likes,
-		}
-
-		postInformations = append(postInformations, postInformation)
+		postInformations = append(postInformations, *postInformation)
 	}
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
@@ -480,7 +374,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		comments, err := db.FindCommentsForPost(r.Context(), post.ID, true)
+		postInformation, err := createPostInformation(r.Context(), post, username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -488,69 +382,10 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		likes, err := db.FindLikesForPost(r.Context(), post.ID)
-		if err != nil {
-			logger.Error(err)
-			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-			return
-		}
-
-		emojiCounts := createEmojiCountsFromComments(comments)
-
-		selfEmojiCounts := createSelfEmojiCount(comments, username)
-
-		postInformation := model.PostInformation{
-			Post:           post,
-			Comments:       comments,
-			EmojiCount:     emojiCounts,
-			SelfEmojiCount: selfEmojiCounts,
-			Likes:          likes,
-		}
-
-		postInformations = append(postInformations, postInformation)
+		postInformations = append(postInformations, *postInformation)
 	}
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
-}
-
-func fetchJustPosts(w http.ResponseWriter, r *http.Request) {
-	page := findBegin(r)
-
-	posts, err := db.FindPosts(r.Context(), page)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	response.ResultResponseJSON(w, false, http.StatusOK, posts)
-}
-
-func getCommentsForPost(w http.ResponseWriter, r *http.Request) {
-	postID, err := extractID(r, postParam)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	commentsInformation := model.CommentsInformation{
-		PostID:   postID,
-		Comments: comments,
-	}
-
-	response.ResultResponseJSON(w, false, http.StatusOK, commentsInformation)
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
@@ -575,111 +410,13 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(r.Context(), postID)
+	postInfo, err := createPostInformationWithFetchPosts(r.Context(), postID, username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
-	}
-
-	comments, err := db.FindCommentsForPost(r.Context(), postID, true)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	emojiCounts := createEmojiCountsFromComments(comments)
-
-	selfEmojiCounts := createSelfEmojiCount(comments, username)
-
-	likes, err := db.FindLikesForPost(r.Context(), postID)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
-
-		return
-	}
-
-	postInfo := model.PostInformation{
-		Post:           post,
-		Comments:       comments,
-		EmojiCount:     emojiCounts,
-		SelfEmojiCount: selfEmojiCounts,
-		Likes:          likes,
 	}
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInfo)
-}
-
-func createEmojiCountsFromComments(comments []model.Comment) []model.EmojiCount {
-	counts := make([]model.EmojiCount, 0)
-
-	var totalString string
-
-	for _, v := range comments {
-		totalString += v.Message
-	}
-
-	for _, individualEmoji := range totalString {
-		i := exists(counts, string(individualEmoji))
-		if i == -1 {
-			newCount := model.EmojiCount{
-				Emoji: string(individualEmoji),
-				Count: 1,
-			}
-			counts = append(counts, newCount)
-		} else {
-			counts[i].Count++
-		}
-	}
-
-	sort.Slice(counts, func(i, j int) bool {
-		return counts[i].Count > counts[j].Count
-	})
-
-	return counts
-}
-
-func exists(current []model.EmojiCount, needle string) int {
-	for i, count := range current {
-		if count.Emoji == needle {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func createSelfEmojiCount(comments []model.Comment, username string) []model.EmojiCount {
-	counts := make([]model.EmojiCount, 0)
-
-	var totalString string
-
-	for _, comment := range comments {
-		if comment.Username == username {
-			totalString += comment.Message
-		}
-	}
-
-	for _, individualEmoji := range totalString {
-		i := exists(counts, string(individualEmoji))
-		if i == -1 {
-			newCount := model.EmojiCount{
-				Emoji: string(individualEmoji),
-				Count: 1,
-			}
-			counts = append(counts, newCount)
-		} else {
-			counts[i].Count++
-		}
-	}
-
-	sort.Slice(counts, func(i, j int) bool {
-		return counts[i].Count > counts[j].Count
-	})
-
-	return counts
 }
