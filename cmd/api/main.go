@@ -14,30 +14,14 @@ import (
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/middlewares"
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
+	"github.com/TomBowyerResearchProject/common/redis"
 	"github.com/TomBowyerResearchProject/common/verification"
 )
 
 const timeBeforeTimeout = 15
 
 func main() {
-	logger.InitLogger("postit")
-
-	verification.Init(verification.VerificationConfig{
-		VerificationURL: os.Getenv("VERIFICATION_URL"),
-	})
-
-	middlewares.Init(middlewares.Config{
-		AllowedOrigin:  "*",
-		AllowedMethods: "GET,POST,DELETE,OPTIONS",
-		AllowedHeaders: "*",
-	})
-
-	err := commonPostgres.Connect(commonPostgres.Config{
-		URI: os.Getenv("DATABASE_URL"),
-	})
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	doInit()
 
 	router := api.CreateRouter()
 
@@ -80,4 +64,33 @@ func main() {
 	}
 
 	<-idleConnsClosed
+}
+
+func doInit() {
+	logger.InitLogger("postit")
+
+	verification.Init(verification.VerificationConfig{
+		VerificationURL: os.Getenv("VERIFICATION_URL"),
+	})
+
+	middlewares.Init(middlewares.Config{
+		AllowedOrigin:  "*",
+		AllowedMethods: "GET,POST,DELETE,OPTIONS",
+		AllowedHeaders: "*",
+	})
+
+	err := commonPostgres.Connect(commonPostgres.Config{
+		URI: os.Getenv("DATABASE_URL"),
+	})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = redis.Init(redis.Config{
+		Addr:   "redis_db_1:6379",
+		Prefix: "POSTIT",
+	})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
