@@ -13,7 +13,7 @@ services:
       default:
 
   test_redis_db:
-    image: ghcr.io/tombowyerresearchproject/redis_db
+    image: redis:6.2.3-alpine
     ports:
       - 63790:6379
     restart: unless-stopped
