@@ -16,6 +16,8 @@ services:
       NOTIFICATION_AUTH: qutSecret
       HOST: 0.0.0.0
       PORT: 80
+      REDIS_ADDR: redis_db_1:6379
+      REDIS_PREFIX: POSTIT
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"

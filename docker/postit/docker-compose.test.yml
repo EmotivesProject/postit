@@ -12,6 +12,14 @@ services:
     networks:
       default:
 
+  test_redis_db:
+    image: ghcr.io/tombowyerresearchproject/redis_db
+    ports:
+      - 63790:6379
+    restart: unless-stopped
+    networks:
+      default:
+
   uacl_api:
     image: ghcr.io/tombowyerresearchproject/uacl_api:latest
     restart: unless-stopped

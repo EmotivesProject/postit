@@ -87,8 +87,8 @@ func doInit() {
 	}
 
 	err = redis.Init(redis.Config{
-		Addr:   "redis_db_1:6379",
-		Prefix: "POSTIT",
+		Addr:   os.Getenv("REDIS_ADDR"),
+		Prefix: os.Getenv("POSTIT"),
 	})
 	if err != nil {
 		log.Fatal(err.Error())

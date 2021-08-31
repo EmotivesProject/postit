@@ -113,6 +113,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
+// nolint
 func createComment(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
@@ -306,6 +307,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, like)
 }
 
+//nolint
 func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 	username, ok := r.Context().Value(verification.UserID).(string)
 	if !ok {
