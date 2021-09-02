@@ -470,7 +470,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal([]byte(result), &resultModel)
 		if err == nil {
-			response.ResultResponseJSON(w, false, http.StatusOK, result)
+			response.ResultResponseJSON(w, false, http.StatusOK, resultModel)
 
 			return
 		}
