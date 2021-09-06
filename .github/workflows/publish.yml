@@ -17,18 +17,22 @@ jobs:
       - name: Build image
         run: ./scripts/build.sh
       - name: Log in and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
         run: |
-          echo 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 | docker login ghcr.io -u imthetom --password-stdin
+          echo $GITHUB_TOKEN | docker login ghcr.io -u imthetom --password-stdin
           docker push ghcr.io/tombowyerresearchproject/postit_api:latest
       - name: Connect and deploy
         uses: appleboy/ssh-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
         with:
-          host: 162.0.216.160
-          username: root
-          password: Github123
-          port: 22
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          envs: GITHUB_TOKEN
           script: |
-            echo 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 | docker login ghcr.io -u imthetom --password-stdin
+            echo $GITHUB_TOKEN | docker login ghcr.io -u imthetom --password-stdin
             docker pull ghcr.io/tombowyerresearchproject/postit_api:latest
             rm -R postit
             git clone git@github.com:TomBowyerResearchProject/postit.git
