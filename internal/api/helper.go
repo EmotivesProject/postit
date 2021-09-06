@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"postit/internal/db"
 	"postit/model"
-	"sort"
 	"strconv"
 
 	"github.com/go-chi/chi"
@@ -84,9 +83,7 @@ func createPostInformation(ctx context.Context, post model.Post, username string
 	return &postInfo, nil
 }
 
-func createEmojiCountsFromComments(comments []model.Comment, username string) []model.EmojiCount {
-	counts := make([]model.EmojiCount, 0)
-
+func createEmojiCountsFromComments(comments []model.Comment, username string) string {
 	var totalString string
 
 	for _, comment := range comments {
@@ -97,32 +94,5 @@ func createEmojiCountsFromComments(comments []model.Comment, username string) []
 		}
 	}
 
-	for _, individualEmoji := range totalString {
-		i := exists(counts, string(individualEmoji))
-		if i == -1 {
-			newCount := model.EmojiCount{
-				Emoji: string(individualEmoji),
-				Count: 1,
-			}
-			counts = append(counts, newCount)
-		} else {
-			counts[i].Count++
-		}
-	}
-
-	sort.Slice(counts, func(i, j int) bool {
-		return counts[i].Count > counts[j].Count
-	})
-
-	return counts
-}
-
-func exists(current []model.EmojiCount, needle string) int {
-	for i, count := range current {
-		if count.Emoji == needle {
-			return i
-		}
-	}
-
-	return -1
+	return totalString
 }
