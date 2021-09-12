@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"postit/internal/api"
 	"strings"
 	"testing"
@@ -28,7 +29,11 @@ var TS *httptest.Server
 func SetUpIntegrationTest() {
 	rand.Seed(time.Now().Unix())
 
-	logger.InitLogger("postit")
+	logger.InitLogger("postit", logger.EmailConfig{
+		From:     os.Getenv("EMAIL_FROM"),
+		Password: os.Getenv("EMAIL_PASSWORD"),
+		Level:    os.Getenv("EMAIL_LEVEL"),
+	})
 
 	err := commonPostgres.Connect(commonPostgres.Config{
 		URI: "postgres://tom:tom123@localhost:5435/postit_db",
