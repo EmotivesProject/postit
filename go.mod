@@ -3,7 +3,7 @@ module postit
 go 1.16
 
 require (
-	github.com/TomBowyerResearchProject/common/logger v0.0.0-20210705095908-154760228061
+	github.com/TomBowyerResearchProject/common/logger v0.0.0-20210911232627-ec84ebf2ae78
 	github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210705095908-154760228061
 	github.com/TomBowyerResearchProject/common/notification v0.0.0-20210705095908-154760228061
 	github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061
