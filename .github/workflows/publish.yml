@@ -38,4 +38,4 @@ jobs:
             rm -R postit
             git clone git@github.com:TomBowyerResearchProject/postit.git
             cd postit
-            ./scripts/start.sh prod
+            ./scripts/start.sh prod no $GMAIL_PASSWORD
