@@ -26,11 +26,12 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          envs: GITHUB_TOKEN
+          envs: GITHUB_TOKEN,GMAIL_PASSWORD
           script: |
             echo $GITHUB_TOKEN | docker login ghcr.io -u imthetom --password-stdin
             docker pull ghcr.io/tombowyerresearchproject/postit_api:latest

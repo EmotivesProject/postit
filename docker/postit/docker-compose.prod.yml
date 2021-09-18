@@ -16,7 +16,7 @@ services:
       REDIS_ADDR: redis_db_1:6379
       REDIS_PREFIX: POSTIT
       EMAIL_FROM: emotives.acc@gmail.com
-      EMAIL_PASSWORD: qutSecret123
+      EMAIL_PASSWORD: "${GMAIL_PASSWORD:-}"
       EMAIL_LEVEL: PROD
     logging:
       driver: syslog
