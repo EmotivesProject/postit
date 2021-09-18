@@ -3,6 +3,7 @@
 
 stage="$1"
 build="$2"
+export GMAIL_PASSWORD="$3"
 
 if [ "$stage" == 'prod' ]; then
 	if [ "$build" == 'yes' ]; then
