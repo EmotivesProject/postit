@@ -18,6 +18,7 @@ services:
       PORT: 80
       REDIS_ADDR: redis_db_1:6379
       REDIS_PREFIX: POSTIT
+      ALLOWED_ORIGINS: http://localhost
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.postit.rule=Host(`postit.localhost`)"

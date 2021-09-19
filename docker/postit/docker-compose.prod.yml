@@ -18,6 +18,7 @@ services:
       EMAIL_FROM: emotives.acc@gmail.com
       EMAIL_PASSWORD: "${GMAIL_PASSWORD:-}"
       EMAIL_LEVEL: PROD
+      ALLOWED_ORIGINS: https://emotives.net,https://www.emotives.net
     logging:
       driver: syslog
     labels:
