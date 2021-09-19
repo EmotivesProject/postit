@@ -37,7 +37,7 @@ func SetUpIntegrationTest() {
 	})
 
 	middlewares.Init(middlewares.Config{
-		AllowedOrigins: os.Getenv("ALLOWED_ORIGINS"),
+		AllowedOrigins: "*",
 		AllowedMethods: "GET,POST,OPTIONS,DELETE",
 		AllowedHeaders: "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, X-CSRF-Token",
 	})
