@@ -269,6 +269,8 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go send.DeletePost(postID)
+
 	logger.Infof("Successfully deleted post %d", postID)
 	response.ResultResponseJSON(w, false, http.StatusOK, post)
 }
