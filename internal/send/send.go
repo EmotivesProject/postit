@@ -60,7 +60,7 @@ func DeletePost(postID int) {
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Error(err)
+	} else {
+		resp.Body.Close()
 	}
-
-	resp.Body.Close()
 }
