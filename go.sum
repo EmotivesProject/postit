@@ -26,6 +26,8 @@ github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210919020645-8f1
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210919020645-8f129e3e6e37/go.mod h1:liIUpECIspX/aGyMoYasl8TDNE1rzH1vwTkn7oksnGg=
 github.com/TomBowyerResearchProject/common/notification v0.0.0-20210705095908-154760228061 h1:uNoKIJciZRh6m7jgJCWFEG1luKCcRYabrbE1vULyQtA=
 github.com/TomBowyerResearchProject/common/notification v0.0.0-20210705095908-154760228061/go.mod h1:MwzK5wynS2gnRbCIsxdix47ZD1CFW1YLtF9BC7tShXY=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20211008105827-20ddb738a853 h1:azztijCPfM0v7aP7puaLLIsWMZkVqIqiy1bOVRmJqXA=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20211008105827-20ddb738a853/go.mod h1:xPLEm8mekCzDKJym1SJksRl4ZT5y29Gxfz4BcC/gDz8=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061 h1:pfTU6BUTvvdepADDwj7pGYLn8DDqT4R7l5nkU9vzwaQ=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061/go.mod h1:zovfD1vC7b/W5PtvkwPgxcQt25HkBEV1xmDUhPN3wlw=
 github.com/TomBowyerResearchProject/common/redis v0.0.0-20210830224359-b7db65de1847 h1:Cw5enxYTMETjkeMBqezhNWRoieckQOfEA9hU1Q93Zqc=
@@ -451,6 +453,7 @@ go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=
 go.mongodb.org/mongo-driver v1.5.2 h1:AsxOLoJTgP6YNM0fXWw4OjdluYmWzQYp+lFJL7xu9fU=
 go.mongodb.org/mongo-driver v1.5.2/go.mod h1:gRXCHX4Jo7J0IJ1oDQyUxF7jfy19UfxniMS4xxMmUqw=
+go.mongodb.org/mongo-driver v1.7.1/go.mod h1:Q4oFMbo1+MSNqICAdYMlC/zSTrwCogR4R8NzkI+yfU8=
 go.opencensus.io v0.20.1/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
 go.opencensus.io v0.20.2/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
