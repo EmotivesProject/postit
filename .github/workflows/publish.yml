@@ -27,15 +27,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
           GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+          NOTIFICATION_AUTH: ${{ secrets.NOTIFICATION_AUTH }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          envs: GITHUB_TOKEN,GMAIL_PASSWORD
+          envs: GITHUB_TOKEN,GMAIL_PASSWORD,NOTIFICATION_AUTH
           script: |
             echo $GITHUB_TOKEN | docker login ghcr.io -u imthetom --password-stdin
             docker pull ghcr.io/tombowyerresearchproject/postit_api:latest
             rm -R postit
             git clone git@github.com:TomBowyerResearchProject/postit.git
             cd postit
-            ./scripts/start.sh prod no $GMAIL_PASSWORD
+            ./scripts/start.sh prod no $GMAIL_PASSWORD $NOTIFICATION_AUTH

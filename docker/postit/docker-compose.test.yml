@@ -31,6 +31,6 @@ services:
       PORT: 80
       PRIVATE_KEY: ./../jwt/private.key
       PUBLIC_KEY: ./../jwt/public.key
-      SECRET: qutCreate
+      SECRET: test
     networks:
       default:
