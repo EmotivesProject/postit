@@ -4,9 +4,11 @@ import (
 	"context"
 	"net/http"
 	"postit/internal/db"
+	"postit/messages"
 	"postit/model"
 	"strconv"
 
+	"github.com/TomBowyerResearchProject/common/verification"
 	"github.com/go-chi/chi"
 )
 
@@ -47,14 +49,14 @@ func extractID(r *http.Request, param string) (int, error) {
 }
 
 func createPostInformationWithFetchPosts(
-	ctx context.Context, postID int, username string,
+	ctx context.Context, postID int, user model.User,
 ) (*model.PostInformation, error) {
-	post, err := db.FindPostByID(ctx, postID)
+	post, err := db.FindPostByIDForUser(ctx, postID, user)
 	if err != nil {
 		return nil, err
 	}
 
-	return createPostInformation(ctx, post, username)
+	return createPostInformation(ctx, post, user.Username)
 }
 
 func createPostInformation(ctx context.Context, post model.Post, username string) (*model.PostInformation, error) {
@@ -95,4 +97,23 @@ func createEmojiCountsFromComments(comments []model.Comment, username string) st
 	}
 
 	return totalString
+}
+
+func getUsernameAndGroup(r *http.Request) (model.User, error) {
+	user := model.User{}
+
+	username, ok := r.Context().Value(verification.UserID).(string)
+	if !ok {
+		return user, messages.ErrInvalidCheck
+	}
+
+	userGroup, ok := r.Context().Value(verification.UserGroup).(string)
+	if !ok {
+		return user, messages.ErrInvalidCheck
+	}
+
+	user.Username = username
+	user.UserGroup = userGroup
+
+	return user, nil
 }

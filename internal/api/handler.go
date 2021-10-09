@@ -14,7 +14,6 @@ import (
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/redis"
 	"github.com/TomBowyerResearchProject/common/response"
-	"github.com/TomBowyerResearchProject/common/verification"
 )
 
 var (
@@ -24,8 +23,8 @@ var (
 )
 
 func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -37,7 +36,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(r.Context(), username)
+	err = db.CheckUsername(r.Context(), user)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
@@ -50,7 +49,7 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := db.FindByUsername(r.Context(), username)
+	user, err = db.FindByUsername(r.Context(), user.Username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusBadRequest, response.Message{Message: err.Error()})
@@ -62,8 +61,8 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -75,7 +74,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(r.Context(), username)
+	err = db.CheckUsername(r.Context(), user)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
@@ -91,7 +90,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	post, err := db.CreatePost(
 		r.Context(),
 		r.Body,
-		username,
+		user.Username,
 	)
 	if err != nil {
 		logger.Error(err)
@@ -100,7 +99,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformation, err := createPostInformation(r.Context(), *post, username)
+	postInformation, err := createPostInformation(r.Context(), *post, user.Username)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -108,15 +107,15 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Infof("Successfully created post %s", username)
+	logger.Infof("Successfully created post %s", user.Username)
 
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
 // nolint
 func createComment(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -128,7 +127,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(r.Context(), username)
+	err = db.CheckUsername(r.Context(), user)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
@@ -152,7 +151,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 	_, err = db.CreateComment(
 		r.Context(),
 		r.Body,
-		username,
+		user.Username,
 		postID,
 	)
 	if err != nil {
@@ -162,7 +161,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformation, err := createPostInformationWithFetchPosts(r.Context(), postID, username)
+	postInformation, err := createPostInformationWithFetchPosts(r.Context(), postID, user)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -177,13 +176,13 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		logger.Error(err)
 	}
 
-	logger.Infof("Created comment for %s", username)
+	logger.Infof("Created comment for %s", user.Username)
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -195,7 +194,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.CheckUsername(r.Context(), username)
+	err = db.CheckUsername(r.Context(), user)
 	if err != nil {
 		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
@@ -218,7 +217,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 
 	like, err := db.CreateLike(
 		r.Context(),
-		username,
+		user.Username,
 		postID,
 	)
 	if err != nil {
@@ -228,14 +227,14 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := db.FindPostByID(r.Context(), postID)
+	post, err := db.FindPostByIDForUser(r.Context(), postID, user)
 	if err != nil {
 		logger.Error(err)
-	} else if post.Username != username {
-		send.Like(post.Username, username, post.ID)
+	} else if post.Username != user.Username {
+		send.Like(post.Username, user.Username, post.ID)
 	}
 
-	logger.Infof("Created like for %s", username)
+	logger.Infof("Created like for %s", user.Username)
 	response.ResultResponseJSON(w, false, http.StatusCreated, like)
 }
 
@@ -311,8 +310,8 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 
 //nolint
 func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -340,7 +339,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 
 	postInformations := make([]model.PostInformation, 0)
 
-	posts, err := db.FindPostsBasedOnLatAndLng(r.Context(), lat, lng, page)
+	posts, err := db.FindPostsBasedOnLatAndLng(r.Context(), lat, lng, page, user)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -363,7 +362,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		postInformation, err := createPostInformation(r.Context(), post, username)
+		postInformation, err := createPostInformation(r.Context(), post, user.Username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -383,8 +382,8 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -400,7 +399,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 
 	postInformations := make([]model.PostInformation, 0)
 
-	posts, err := db.FindPosts(r.Context(), page)
+	posts, err := db.FindPosts(r.Context(), page, user)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -423,7 +422,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		postInformation, err := createPostInformation(r.Context(), post, username)
+		postInformation, err := createPostInformation(r.Context(), post, user.Username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -443,8 +442,8 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
-	username, ok := r.Context().Value(verification.UserID).(string)
-	if !ok {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
 		logger.Error(messages.ErrInvalidCheck)
 		response.MessageResponseJSON(
 			w,
@@ -478,7 +477,7 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	postInfo, err := createPostInformationWithFetchPosts(r.Context(), postID, username)
+	postInfo, err := createPostInformationWithFetchPosts(r.Context(), postID, user)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
