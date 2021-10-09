@@ -12,16 +12,13 @@ import (
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
 )
 
-func CreateUser(ctx context.Context, username string) (*model.User, error) {
-	user := model.User{
-		Username: username,
-	}
-
+func CreateUser(ctx context.Context, user model.User) (*model.User, error) {
 	connection := commonPostgres.GetDatabase()
 	_, err := connection.Exec(
 		ctx,
-		"INSERT INTO users(username) VALUES ($1)",
+		"INSERT INTO users(username,user_group) VALUES ($1, $2)",
 		user.Username,
+		user.UserGroup,
 	)
 
 	return &user, err

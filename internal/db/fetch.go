@@ -12,10 +12,10 @@ const (
 	ExploreBound = 2
 )
 
-func CheckUsername(ctx context.Context, username string) error {
-	_, err := FindByUsername(ctx, username)
+func CheckUsername(ctx context.Context, user model.User) error {
+	_, err := FindByUsername(ctx, user.Username)
 	if err != nil {
-		_, err = CreateUser(ctx, username)
+		_, err = CreateUser(ctx, user)
 	}
 
 	return err
@@ -27,13 +27,30 @@ func FindByUsername(ctx context.Context, username string) (model.User, error) {
 
 	err := connection.QueryRow(
 		ctx,
-		"SELECT id, username FROM users WHERE username = $1",
+		"SELECT * FROM users WHERE username = $1",
 		username,
 	).Scan(
-		&user.ID, &user.Username,
+		&user.ID, &user.Username, &user.UserGroup,
 	)
 
 	return *user, err
+}
+
+func FindPostByIDForUser(ctx context.Context, postID int, user model.User) (model.Post, error) {
+	post := &model.Post{}
+	connection := commonPostgres.GetDatabase()
+
+	err := connection.QueryRow(
+		ctx,
+		`SELECT id, username, content, created_at, updated_at, active FROM posts WHERE id = $1 and username in
+		(select username from users where user_group = $2)`,
+		postID,
+		user.UserGroup,
+	).Scan(
+		&post.ID, &post.Username, &post.Content, &post.CreatedAt, &post.UpdatedAt, &post.Active,
+	)
+
+	return *post, err
 }
 
 func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
@@ -42,7 +59,7 @@ func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
 
 	err := connection.QueryRow(
 		ctx,
-		"SELECT id, username, content, created_at, updated_at, active FROM posts WHERE id = $1",
+		`SELECT id, username, content, created_at, updated_at, active FROM posts WHERE id = $1`,
 		postID,
 	).Scan(
 		&post.ID, &post.Username, &post.Content, &post.CreatedAt, &post.UpdatedAt, &post.Active,
@@ -51,14 +68,17 @@ func FindPostByID(ctx context.Context, postID int) (model.Post, error) {
 	return *post, err
 }
 
-func FindPosts(ctx context.Context, offset int) ([]model.Post, error) {
+func FindPosts(ctx context.Context, offset int, user model.User) ([]model.Post, error) {
 	posts := make([]model.Post, 0)
 
 	connection := commonPostgres.GetDatabase()
 
 	rows, err := connection.Query(
 		ctx,
-		"SELECT * FROM posts ORDER BY created_at desc LIMIT 5 OFFSET $1",
+		`SELECT * FROM posts where username in
+		(select username from users where user_group = $1)
+		ORDER BY created_at desc LIMIT 5 OFFSET $2`,
+		user.UserGroup,
 		offset,
 	)
 	if err != nil {
@@ -86,7 +106,9 @@ func FindPosts(ctx context.Context, offset int) ([]model.Post, error) {
 	return posts, nil
 }
 
-func FindPostsBasedOnLatAndLng(ctx context.Context, lat, lng float64, offset int) ([]model.Post, error) {
+func FindPostsBasedOnLatAndLng(
+	ctx context.Context, lat, lng float64, offset int, user model.User,
+) ([]model.Post, error) {
 	posts := make([]model.Post, 0)
 
 	connection := commonPostgres.GetDatabase()
@@ -102,11 +124,13 @@ func FindPostsBasedOnLatAndLng(ctx context.Context, lat, lng float64, offset int
 		`SELECT * FROM posts
 		WHERE (content->'latitude')::float < $1 AND (content->'latitude')::float > $2
 		AND (content->'longitude')::float < $3 AND (content->'longitude')::float > $4
-		ORDER BY created_at desc LIMIT 5 OFFSET $5`,
+		AND username in (select username from users where user_group = $5)
+		ORDER BY created_at desc LIMIT 5 OFFSET $6`,
 		maxLat,
 		minLat,
 		maxLng,
 		minLng,
+		user.UserGroup,
 		offset,
 	)
 	if err != nil {
