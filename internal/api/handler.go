@@ -164,7 +164,12 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go send.Comment(postInformation.Post.Username, user.Username, postInformation.Post.ID)
+	post, err := db.FindPostByIDForUser(r.Context(), postID, user)
+	if err != nil {
+		logger.Error(err)
+	} else if post.Username != user.Username {
+		send.Comment(post.Username, user.Username, post.ID)
+	}
 
 	logger.Infof("Created comment for %s", user.Username)
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)

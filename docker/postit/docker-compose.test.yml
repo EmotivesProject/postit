@@ -23,14 +23,18 @@ services:
   uacl_api:
     image: ghcr.io/tombowyerresearchproject/uacl_api:latest
     restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./../../test/jwt/private.key:/jwt/private.key
+      - ./../../test/jwt/public.key:/jwt/public.key
     ports:
       - 8082:80
     environment:
       DATABASE_URL: postgres://tom:tom123@test_db:5432/uacl_db
       HOST: 0.0.0.0
       PORT: 80
-      PRIVATE_KEY: ./../jwt/private.key
-      PUBLIC_KEY: ./../jwt/public.key
+      PRIVATE_KEY: /jwt/private.key
+      PUBLIC_KEY: /jwt/public.key
       SECRET: test
     networks:
       default:
