@@ -2,24 +2,19 @@ package api
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"postit/internal/db"
 	"postit/internal/send"
 	"postit/messages"
 	"postit/model"
-	"time"
 
 	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/redis"
 	"github.com/TomBowyerResearchProject/common/response"
 )
 
 var (
-	postParam  = "post_id"
-	likeParam  = "like_id"
-	redisCache = time.Minute * 10
+	postParam = "post_id"
+	likeParam = "like_id"
 )
 
 func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
@@ -169,12 +164,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redisKey := fmt.Sprintf("PostInfo.%d", postID)
-
-	err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
-	if err != nil {
-		logger.Error(err)
-	}
+	go send.Comment(postInformation.Post.Username, user.Username, postInformation.Post.ID)
 
 	logger.Infof("Created comment for %s", user.Username)
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
@@ -348,31 +338,12 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		redisKey := fmt.Sprintf("PostInfo.%d", post.ID)
-
-		result, err := redis.Get(r.Context(), redisKey)
-		if err == nil {
-			resultModel := model.PostInformation{}
-			err = json.Unmarshal([]byte(result), &resultModel)
-
-			if err == nil {
-				postInformations = append(postInformations, resultModel)
-
-				continue
-			}
-		}
-
 		postInformation, err := createPostInformation(r.Context(), post, user.Username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 			return
-		}
-
-		err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
-		if err != nil {
-			logger.Error(err)
 		}
 
 		postInformations = append(postInformations, *postInformation)
@@ -408,31 +379,12 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range posts {
-		redisKey := fmt.Sprintf("PostInfo.%d", post.ID)
-
-		result, err := redis.Get(r.Context(), redisKey)
-		if err == nil {
-			resultModel := model.PostInformation{}
-			err = json.Unmarshal([]byte(result), &resultModel)
-
-			if err == nil {
-				postInformations = append(postInformations, resultModel)
-
-				continue
-			}
-		}
-
 		postInformation, err := createPostInformation(r.Context(), post, user.Username)
 		if err != nil {
 			logger.Error(err)
 			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 			return
-		}
-
-		err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
-		if err != nil {
-			logger.Error(err)
 		}
 
 		postInformations = append(postInformations, *postInformation)
@@ -463,31 +415,12 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redisKey := fmt.Sprintf("PostInfo.%d", postID)
-
-	result, err := redis.Get(r.Context(), redisKey)
-	if err == nil {
-		resultModel := model.PostInformation{}
-
-		err = json.Unmarshal([]byte(result), &resultModel)
-		if err == nil {
-			response.ResultResponseJSON(w, false, http.StatusOK, resultModel)
-
-			return
-		}
-	}
-
 	postInfo, err := createPostInformationWithFetchPosts(r.Context(), postID, user)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return
-	}
-
-	err = redis.SetEx(r.Context(), redisKey, *postInfo, redisCache)
-	if err != nil {
-		logger.Error(err)
 	}
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInfo)

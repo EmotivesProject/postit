@@ -15,7 +15,6 @@ import (
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/middlewares"
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
-	"github.com/TomBowyerResearchProject/common/redis"
 	commonTest "github.com/TomBowyerResearchProject/common/test"
 	"github.com/TomBowyerResearchProject/common/verification"
 )
@@ -44,14 +43,6 @@ func SetUpIntegrationTest() {
 
 	err := commonPostgres.Connect(commonPostgres.Config{
 		URI: "postgres://tom:tom123@localhost:5435/postit_db",
-	})
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	err = redis.Init(redis.Config{
-		Addr:   "test_redis_db:63790",
-		Prefix: "POSTIT",
 	})
 	if err != nil {
 		log.Fatal(err.Error())
