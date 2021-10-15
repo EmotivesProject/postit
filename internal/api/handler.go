@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"postit/internal/db"
 	"postit/internal/send"
@@ -51,6 +52,8 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	logger.Infof("authorized user for request %s", user.Username)
 
 	response.ResultResponseJSON(w, false, http.StatusOK, user)
 }
@@ -102,7 +105,16 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Infof("Successfully created post %s", user.Username)
+	postInfo := postInformation.Post
+
+	postInfoPayload, err := json.Marshal(postInfo)
+	if err != nil {
+		logger.Error(err)
+
+		return
+	}
+
+	logger.Infof("Successfully created post %s with information %s", user.Username, string(postInfoPayload))
 
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
@@ -143,7 +155,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.CreateComment(
+	comment, err := db.CreateComment(
 		r.Context(),
 		r.Body,
 		user.Username,
@@ -171,7 +183,7 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		send.Comment(post.Username, user.Username, post.ID)
 	}
 
-	logger.Infof("Created comment for %s", user.Username)
+	logger.Infof("Created comment USER-%s COMMENT-%s", user.Username, comment.Message)
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
@@ -229,7 +241,7 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		send.Like(post.Username, user.Username, post.ID)
 	}
 
-	logger.Infof("Created like for %s", user.Username)
+	logger.Infof("Created like for %s on post %d", user.Username, post.ID)
 	response.ResultResponseJSON(w, false, http.StatusCreated, like)
 }
 
@@ -242,6 +254,8 @@ func updatePost(ctx context.Context, postID int) (model.Post, error) {
 	post.Active = false
 
 	err = db.UpdatePost(ctx, &post)
+
+	logger.Infof("Post id %d is now inactive", post.ID)
 
 	return post, err
 }
@@ -265,7 +279,8 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 
 	go send.DeletePost(postID)
 
-	logger.Infof("Successfully deleted post %d", postID)
+	logger.Infof("Post id %d is now deleted", postID)
+
 	response.ResultResponseJSON(w, false, http.StatusOK, post)
 }
 
@@ -278,6 +293,8 @@ func updateLike(ctx context.Context, likeID int) (model.Like, error) {
 	like.Active = false
 
 	err = db.UpdateLike(ctx, &like)
+
+	logger.Infof("Like id %d from user %s is now inactive", like.ID, like.Username)
 
 	return like, err
 }
@@ -299,7 +316,8 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Infof("Successfully deleted like %d", likeID)
+	logger.Infof("Like id %d from user %s is now deleted", like.ID, like.Username)
+
 	response.ResultResponseJSON(w, false, http.StatusOK, like)
 }
 
@@ -354,6 +372,8 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 		postInformations = append(postInformations, *postInformation)
 	}
 
+	logger.Infof("User %s requested explore posts on page %d", user.Username, page)
+
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
 }
 
@@ -395,6 +415,8 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		postInformations = append(postInformations, *postInformation)
 	}
 
+	logger.Infof("User %s requested posts on page %d", user.Username, page)
+
 	response.ResultResponseJSON(w, false, http.StatusOK, postInformations)
 }
 
@@ -427,6 +449,8 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	logger.Infof("User %s requested individual post id %d", user.Username, postID)
 
 	response.ResultResponseJSON(w, false, http.StatusOK, postInfo)
 }
