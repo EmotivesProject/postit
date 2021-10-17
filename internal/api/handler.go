@@ -336,6 +336,19 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = db.CheckUsername(r.Context(), user)
+	if err != nil {
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalid.Error()},
+		)
+
+		return
+	}
+
 	lat := findPosition(r, "lat")
 	lng := findPosition(r, "lng")
 
@@ -391,6 +404,19 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = db.CheckUsername(r.Context(), user)
+	if err != nil {
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalid.Error()},
+		)
+
+		return
+	}
+
 	page := findBegin(r)
 
 	postInformations := make([]model.PostInformation, 0)
@@ -429,6 +455,19 @@ func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
 			false,
 			http.StatusUnprocessableEntity,
 			response.Message{Message: messages.ErrInvalidCheck.Error()},
+		)
+
+		return
+	}
+
+	err = db.CheckUsername(r.Context(), user)
+	if err != nil {
+		logger.Error(messages.ErrInvalidUsername)
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalid.Error()},
 		)
 
 		return
