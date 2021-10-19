@@ -77,7 +77,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformation, err := createPostInformation(r.Context(), *post, user.Username)
+	postInformation, err := createPostInformation(r.Context(), *post)
 	if err != nil {
 		logger.Error(err)
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
@@ -361,7 +361,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformations := fetchPostInformationsFromPosts(r.Context(), user, posts)
+	postInformations := fetchPostInformationsFromPosts(r.Context(), posts)
 
 	logger.Infof("User %s requested explore posts on page %d", user.Username, page)
 
@@ -393,7 +393,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformations := fetchPostInformationsFromPosts(r.Context(), user, posts)
+	postInformations := fetchPostInformationsFromPosts(r.Context(), posts)
 
 	logger.Infof("User %s requested posts on page %d", user.Username, page)
 
