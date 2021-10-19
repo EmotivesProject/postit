@@ -117,3 +117,17 @@ func getUsernameAndGroup(r *http.Request) (model.User, error) {
 
 	return user, nil
 }
+
+func getUserAndEnsureUserInDB(r *http.Request) (model.User, error) {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
+		return user, messages.ErrInvalidCheck
+	}
+
+	err = db.CheckUsername(r.Context(), user)
+	if err != nil {
+		return user, messages.ErrInvalidUsername
+	}
+
+	return user, nil
+}

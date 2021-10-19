@@ -19,22 +19,10 @@ var (
 )
 
 func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
+		logger.Error(err)
 
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
 			w,
 			false,
@@ -59,26 +47,14 @@ func fetchUserFromAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
+		logger.Error(err)
+
 		response.MessageResponseJSON(
 			w,
 			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
-
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusInternalServerError,
+			http.StatusBadRequest,
 			response.Message{Message: messages.ErrInvalidUsername.Error()},
 		)
 
@@ -119,28 +95,15 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusCreated, postInformation)
 }
 
-// nolint
 func createComment(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
+		logger.Error(err)
+
 		response.MessageResponseJSON(
 			w,
 			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
-
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusInternalServerError,
+			http.StatusBadRequest,
 			response.Message{Message: messages.ErrInvalidUsername.Error()},
 		)
 
@@ -188,22 +151,10 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func createLike(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
+		logger.Error(err)
 
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
 			w,
 			false,
@@ -321,29 +272,16 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	response.ResultResponseJSON(w, false, http.StatusOK, like)
 }
 
-//nolint
 func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
+		logger.Error(err)
 
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
 			w,
 			false,
 			http.StatusBadRequest,
-			response.Message{Message: messages.ErrInvalid.Error()},
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
 		)
 
 		return
@@ -391,27 +329,15 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchPosts(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
+		logger.Error(err)
 
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
 			w,
 			false,
 			http.StatusBadRequest,
-			response.Message{Message: messages.ErrInvalid.Error()},
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
 		)
 
 		return
@@ -447,27 +373,15 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchIndividualPost(w http.ResponseWriter, r *http.Request) {
-	user, err := getUsernameAndGroup(r)
+	user, err := getUserAndEnsureUserInDB(r)
 	if err != nil {
-		logger.Error(messages.ErrInvalidCheck)
-		response.MessageResponseJSON(
-			w,
-			false,
-			http.StatusUnprocessableEntity,
-			response.Message{Message: messages.ErrInvalidCheck.Error()},
-		)
+		logger.Error(err)
 
-		return
-	}
-
-	err = db.CheckUsername(r.Context(), user)
-	if err != nil {
-		logger.Error(messages.ErrInvalidUsername)
 		response.MessageResponseJSON(
 			w,
 			false,
 			http.StatusBadRequest,
-			response.Message{Message: messages.ErrInvalid.Error()},
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
 		)
 
 		return

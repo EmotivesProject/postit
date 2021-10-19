@@ -108,6 +108,7 @@ func CreateLike(ctx context.Context, username string, postID int) (*model.Like, 
 	}
 
 	connection := commonPostgres.GetDatabase()
+
 	err := connection.QueryRow(
 		ctx,
 		"INSERT INTO likes(post_id,username,created_at,updated_at,active) VALUES ($1,$2,$3,$4,$5) RETURNING id",
@@ -119,7 +120,7 @@ func CreateLike(ctx context.Context, username string, postID int) (*model.Like, 
 	).Scan(
 		&like.ID,
 	)
-	if err != nil { //nolint:wsl
+	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			like, err = UpdateLikeByUsernameAndPost(ctx, like)
 		}
