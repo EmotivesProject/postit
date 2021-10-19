@@ -183,8 +183,6 @@ func updatePostInRedis(ctx context.Context, postID int, user model.User) (model.
 	err = redis.SetEx(ctx, redisKey, *postInformation, redisCache)
 	if err != nil {
 		logger.Error(err)
-
-		return model.PostInformation{}, err
 	}
 
 	return *postInformation, nil

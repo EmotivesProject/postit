@@ -97,4 +97,6 @@ func doInit() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	logger.Info("Connected to redis")
 }
