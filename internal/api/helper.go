@@ -60,18 +60,16 @@ func createPostInformationWithFetchPosts(
 		return nil, err
 	}
 
-	return createPostInformation(ctx, post, user.Username)
+	return createPostInformation(ctx, post)
 }
 
-func createPostInformation(ctx context.Context, post model.Post, username string) (*model.PostInformation, error) {
+func createPostInformation(ctx context.Context, post model.Post) (*model.PostInformation, error) {
 	comments, err := db.FindCommentsForPost(ctx, post.ID, true)
 	if err != nil {
 		return nil, err
 	}
 
-	emojiCounts := createEmojiCountsFromComments(comments, "")
-
-	selfEmojiCounts := createEmojiCountsFromComments(comments, username)
+	emojiSummary := createEmojiSummaryFromComments(comments, "")
 
 	likes, err := db.FindLikesForPost(ctx, post.ID)
 	if err != nil {
@@ -79,17 +77,16 @@ func createPostInformation(ctx context.Context, post model.Post, username string
 	}
 
 	postInfo := model.PostInformation{
-		Post:           post,
-		Comments:       comments,
-		EmojiCount:     emojiCounts,
-		SelfEmojiCount: selfEmojiCounts,
-		Likes:          likes,
+		Post:         post,
+		Comments:     comments,
+		EmojiSummary: emojiSummary,
+		Likes:        likes,
 	}
 
 	return &postInfo, nil
 }
 
-func createEmojiCountsFromComments(comments []model.Comment, username string) string {
+func createEmojiSummaryFromComments(comments []model.Comment, username string) string {
 	var totalString string
 
 	for _, comment := range comments {
@@ -136,7 +133,7 @@ func getUserAndEnsureUserInDB(r *http.Request) (model.User, error) {
 	return user, nil
 }
 
-func fetchPostInformationsFromPosts(ctx context.Context, user model.User, posts []model.Post) []model.PostInformation {
+func fetchPostInformationsFromPosts(ctx context.Context, posts []model.Post) []model.PostInformation {
 	postInformations := make([]model.PostInformation, 0)
 
 	for _, post := range posts {
@@ -154,7 +151,7 @@ func fetchPostInformationsFromPosts(ctx context.Context, user model.User, posts 
 			}
 		}
 
-		postInformation, err := createPostInformation(ctx, post, user.Username)
+		postInformation, err := createPostInformation(ctx, post)
 		if err != nil {
 			continue
 		}
