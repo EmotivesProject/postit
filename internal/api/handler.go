@@ -135,14 +135,6 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postInformation, err := createPostInformationWithFetchPosts(r.Context(), postID, user)
-	if err != nil {
-		logger.Error(err)
-		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-		return
-	}
-
 	post, err := db.FindPostByIDForUser(r.Context(), postID, user)
 	if err != nil {
 		logger.Error(err)
@@ -150,11 +142,11 @@ func createComment(w http.ResponseWriter, r *http.Request) {
 		send.Comment(post.Username, user.Username, post.ID)
 	}
 
-	redisKey := fmt.Sprintf("PostInfo.%d", postID)
-
-	err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
+	postInformation, err := updatePostInRedis(r.Context(), postID, user)
 	if err != nil {
-		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
 	}
 
 	logger.Infof("Created comment USER-%s COMMENT-%s", user.Username, comment.Message)
@@ -203,6 +195,13 @@ func createLike(w http.ResponseWriter, r *http.Request) {
 		send.Like(post.Username, user.Username, post.ID)
 	}
 
+	_, err = updatePostInRedis(r.Context(), postID, user)
+	if err != nil {
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
 	logger.Infof("Created like for %s on post %d", user.Username, post.ID)
 	response.ResultResponseJSON(w, false, http.StatusCreated, like)
 }
@@ -223,6 +222,20 @@ func updatePost(ctx context.Context, postID int) (model.Post, error) {
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
+	user, err := getUserAndEnsureUserInDB(r)
+	if err != nil {
+		logger.Error(err)
+
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
+
+		return
+	}
+
 	postID, err := extractID(r, postParam)
 	if err != nil {
 		logger.Error(err)
@@ -240,6 +253,13 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go send.DeletePost(postID)
+
+	_, err = updatePostInRedis(r.Context(), post.ID, user)
+	if err != nil {
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
 
 	logger.Infof("Post id %d is now deleted", postID)
 
@@ -262,6 +282,20 @@ func updateLike(ctx context.Context, likeID int) (model.Like, error) {
 }
 
 func deleteLike(w http.ResponseWriter, r *http.Request) {
+	user, err := getUserAndEnsureUserInDB(r)
+	if err != nil {
+		logger.Error(err)
+
+		response.MessageResponseJSON(
+			w,
+			false,
+			http.StatusBadRequest,
+			response.Message{Message: messages.ErrInvalidUsername.Error()},
+		)
+
+		return
+	}
+
 	likeID, err := extractID(r, likeParam)
 	if err != nil {
 		logger.Error(err)
@@ -273,6 +307,13 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 	like, err := updateLike(r.Context(), likeID)
 	if err != nil {
 		logger.Error(err)
+		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
+
+		return
+	}
+
+	_, err = updatePostInRedis(r.Context(), like.PostID, user)
+	if err != nil {
 		response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
 
 		return

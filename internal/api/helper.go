@@ -169,3 +169,23 @@ func fetchPostInformationsFromPosts(ctx context.Context, user model.User, posts 
 
 	return postInformations
 }
+
+func updatePostInRedis(ctx context.Context, postID int, user model.User) (model.PostInformation, error) {
+	postInformation, err := createPostInformationWithFetchPosts(ctx, postID, user)
+	if err != nil {
+		logger.Error(err)
+
+		return model.PostInformation{}, err
+	}
+
+	redisKey := fmt.Sprintf("PostInfo.%d", postID)
+
+	err = redis.SetEx(ctx, redisKey, *postInformation, redisCache)
+	if err != nil {
+		logger.Error(err)
+
+		return model.PostInformation{}, err
+	}
+
+	return *postInformation, nil
+}
