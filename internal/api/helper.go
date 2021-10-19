@@ -2,12 +2,16 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"postit/internal/db"
 	"postit/messages"
 	"postit/model"
 	"strconv"
 
+	"github.com/TomBowyerResearchProject/common/logger"
+	"github.com/TomBowyerResearchProject/common/redis"
 	"github.com/TomBowyerResearchProject/common/verification"
 	"github.com/go-chi/chi"
 )
@@ -116,4 +120,70 @@ func getUsernameAndGroup(r *http.Request) (model.User, error) {
 	user.UserGroup = userGroup
 
 	return user, nil
+}
+
+func getUserAndEnsureUserInDB(r *http.Request) (model.User, error) {
+	user, err := getUsernameAndGroup(r)
+	if err != nil {
+		return user, messages.ErrInvalidCheck
+	}
+
+	err = db.CheckUsername(r.Context(), user)
+	if err != nil {
+		return user, messages.ErrInvalidUsername
+	}
+
+	return user, nil
+}
+
+func fetchPostInformationsFromPosts(ctx context.Context, user model.User, posts []model.Post) []model.PostInformation {
+	postInformations := make([]model.PostInformation, 0)
+
+	for _, post := range posts {
+		redisKey := fmt.Sprintf("PostInfo.%d", post.ID)
+
+		result, err := redis.Get(ctx, redisKey)
+		if err == nil {
+			resultModel := model.PostInformation{}
+			err = json.Unmarshal([]byte(result), &resultModel)
+
+			if err == nil {
+				postInformations = append(postInformations, resultModel)
+
+				continue
+			}
+		}
+
+		postInformation, err := createPostInformation(ctx, post, user.Username)
+		if err != nil {
+			continue
+		}
+
+		err = redis.SetEx(ctx, redisKey, *postInformation, redisCache)
+		if err != nil {
+			logger.Error(err)
+		}
+
+		postInformations = append(postInformations, *postInformation)
+	}
+
+	return postInformations
+}
+
+func updatePostInRedis(ctx context.Context, postID int, user model.User) (model.PostInformation, error) {
+	postInformation, err := createPostInformationWithFetchPosts(ctx, postID, user)
+	if err != nil {
+		logger.Error(err)
+
+		return model.PostInformation{}, err
+	}
+
+	redisKey := fmt.Sprintf("PostInfo.%d", postID)
+
+	err = redis.SetEx(ctx, redisKey, *postInformation, redisCache)
+	if err != nil {
+		logger.Error(err)
+	}
+
+	return *postInformation, nil
 }

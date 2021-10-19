@@ -14,6 +14,7 @@ import (
 	"github.com/TomBowyerResearchProject/common/logger"
 	"github.com/TomBowyerResearchProject/common/middlewares"
 	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
+	"github.com/TomBowyerResearchProject/common/redis"
 	"github.com/TomBowyerResearchProject/common/verification"
 )
 
@@ -88,4 +89,14 @@ func doInit() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	err = redis.Init(redis.Config{
+		Addr:   os.Getenv("REDIS_ADDR"),
+		Prefix: os.Getenv("POSTIT"),
+	})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	logger.Info("Connected to redis")
 }
