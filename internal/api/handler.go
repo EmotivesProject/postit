@@ -312,8 +312,6 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 
 	page := findBegin(r)
 
-	postInformations := make([]model.PostInformation, 0)
-
 	posts, err := db.FindPostsBasedOnLatAndLng(r.Context(), lat, lng, page, user)
 	if err != nil {
 		logger.Error(err)
@@ -322,36 +320,7 @@ func fetchExplorePosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, post := range posts {
-		redisKey := fmt.Sprintf("PostInfo.%d", post.ID)
-
-		result, err := redis.Get(r.Context(), redisKey)
-		if err == nil {
-			resultModel := model.PostInformation{}
-			err = json.Unmarshal([]byte(result), &resultModel)
-
-			if err == nil {
-				postInformations = append(postInformations, resultModel)
-
-				continue
-			}
-		}
-
-		postInformation, err := createPostInformation(r.Context(), post, user.Username)
-		if err != nil {
-			logger.Error(err)
-			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-			return
-		}
-
-		err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
-		if err != nil {
-			logger.Error(err)
-		}
-
-		postInformations = append(postInformations, *postInformation)
-	}
+	postInformations := fetchPostInformationsFromPosts(r.Context(), user, posts)
 
 	logger.Infof("User %s requested explore posts on page %d", user.Username, page)
 
@@ -375,8 +344,6 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 
 	page := findBegin(r)
 
-	postInformations := make([]model.PostInformation, 0)
-
 	posts, err := db.FindPosts(r.Context(), page, user)
 	if err != nil {
 		logger.Error(err)
@@ -385,36 +352,7 @@ func fetchPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, post := range posts {
-		redisKey := fmt.Sprintf("PostInfo.%d", post.ID)
-
-		result, err := redis.Get(r.Context(), redisKey)
-		if err == nil {
-			resultModel := model.PostInformation{}
-			err = json.Unmarshal([]byte(result), &resultModel)
-
-			if err == nil {
-				postInformations = append(postInformations, resultModel)
-
-				continue
-			}
-		}
-
-		postInformation, err := createPostInformation(r.Context(), post, user.Username)
-		if err != nil {
-			logger.Error(err)
-			response.MessageResponseJSON(w, false, http.StatusInternalServerError, response.Message{Message: err.Error()})
-
-			return
-		}
-
-		err = redis.SetEx(r.Context(), redisKey, *postInformation, redisCache)
-		if err != nil {
-			logger.Error(err)
-		}
-
-		postInformations = append(postInformations, *postInformation)
-	}
+	postInformations := fetchPostInformationsFromPosts(r.Context(), user, posts)
 
 	logger.Infof("User %s requested posts on page %d", user.Username, page)
 
