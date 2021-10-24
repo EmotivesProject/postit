@@ -319,7 +319,7 @@ func deleteLike(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go send.DeleteLike(like.PostID, user.Username)
+	send.DeleteLike(like.PostID, user.Username)
 
 	logger.Infof("Like id %d from user %s is now deleted", like.ID, like.Username)
 
