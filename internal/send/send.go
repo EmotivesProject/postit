@@ -2,7 +2,6 @@ package send
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/TomBowyerResearchProject/common/logger"
@@ -46,21 +45,17 @@ func Like(postOwner, newUsername string, postID int) {
 func DeletePost(postID int) {
 	deleteURL := fmt.Sprintf("%s/post/%d", os.Getenv("NOTIFICATION_URL"), postID)
 
-	req, err := http.NewRequest("DELETE", deleteURL, nil)
+	_, err := notification.SendDelete(deleteURL, os.Getenv("NOTIFICATION_AUTH"))
 	if err != nil {
 		logger.Error(err)
-
-		return
 	}
+}
 
-	req.Header.Set("Authorization", os.Getenv("NOTIFICATION_AUTH"))
+func DeleteLike(postID int, username string) {
+	deleteURL := fmt.Sprintf("%s/like/post/%d/user/%s", os.Getenv("NOTIFICATION_URL"), postID, username)
 
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
+	_, err := notification.SendDelete(deleteURL, os.Getenv("NOTIFICATION_AUTH"))
 	if err != nil {
 		logger.Error(err)
-	} else {
-		resp.Body.Close()
 	}
 }
