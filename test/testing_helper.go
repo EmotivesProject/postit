@@ -30,6 +30,8 @@ var TS *httptest.Server
 func SetUpIntegrationTest() {
 	rand.Seed(time.Now().Unix())
 
+	os.Setenv("NOTIFICATION_URL", "test")
+
 	logger.InitLogger("postit", logger.EmailConfig{
 		From:     os.Getenv("EMAIL_FROM"),
 		Password: os.Getenv("EMAIL_PASSWORD"),
