@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/TomBowyerResearchProject/common/logger v0.0.0-20210911232627-ec84ebf2ae78
 	github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210919020645-8f129e3e6e37
-	github.com/TomBowyerResearchProject/common/notification v0.0.0-20211008105827-20ddb738a853
+	github.com/TomBowyerResearchProject/common/notification v0.0.0-20211024043952-13a579e6de5f
 	github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061
 	github.com/TomBowyerResearchProject/common/redis v0.0.0-20211015205805-83e9007bc2ab
 	github.com/TomBowyerResearchProject/common/response v0.0.0-20211015205805-83e9007bc2ab

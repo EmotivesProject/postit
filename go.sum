@@ -18,6 +18,8 @@ github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210919020645-8f1
 github.com/TomBowyerResearchProject/common/middlewares v0.0.0-20210919020645-8f129e3e6e37/go.mod h1:liIUpECIspX/aGyMoYasl8TDNE1rzH1vwTkn7oksnGg=
 github.com/TomBowyerResearchProject/common/notification v0.0.0-20211008105827-20ddb738a853 h1:azztijCPfM0v7aP7puaLLIsWMZkVqIqiy1bOVRmJqXA=
 github.com/TomBowyerResearchProject/common/notification v0.0.0-20211008105827-20ddb738a853/go.mod h1:xPLEm8mekCzDKJym1SJksRl4ZT5y29Gxfz4BcC/gDz8=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20211024043952-13a579e6de5f h1:OCU4/EpXVHJtAg8RmyM3ZrXkPt0IhQG7PKgrh8HtPew=
+github.com/TomBowyerResearchProject/common/notification v0.0.0-20211024043952-13a579e6de5f/go.mod h1:xPLEm8mekCzDKJym1SJksRl4ZT5y29Gxfz4BcC/gDz8=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061 h1:pfTU6BUTvvdepADDwj7pGYLn8DDqT4R7l5nkU9vzwaQ=
 github.com/TomBowyerResearchProject/common/postgres v0.0.0-20210705095908-154760228061/go.mod h1:zovfD1vC7b/W5PtvkwPgxcQt25HkBEV1xmDUhPN3wlw=
 github.com/TomBowyerResearchProject/common/redis v0.0.0-20211015205805-83e9007bc2ab h1:ViJh9qXw7Ye+uj1U3IV8knlh/IPFIsRST1GDAjcAuWo=
