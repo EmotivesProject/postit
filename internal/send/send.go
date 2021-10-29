@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/notification"
+	"github.com/EmotivesProject/common/logger"
+	"github.com/EmotivesProject/common/notification"
 )
 
 func Comment(postOwner, newUsername string, postID int) {

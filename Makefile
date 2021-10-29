@@ -26,8 +26,8 @@ integration_dry:
 	go test -v -tags=integration ./...
 
 get_latest_containers:
-	docker pull ghcr.io/tombowyerresearchproject/postgres_db:latest
-	docker pull ghcr.io/tombowyerresearchproject/uacl_api:latest
+	docker pull ghcr.io/emotivesproject/postgres_db:latest
+	docker pull ghcr.io/emotivesproject/uacl_api:latest
 
 destory_test_containers:
 	docker-compose -f docker/postit/docker-compose.test.yml down --remove-orphans

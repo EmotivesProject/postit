@@ -4,7 +4,7 @@ import (
 	"context"
 	"postit/model"
 
-	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
+	commonPostgres "github.com/EmotivesProject/common/postgres"
 )
 
 const (
