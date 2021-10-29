@@ -7,7 +7,7 @@ import (
 	"postit/test"
 	"testing"
 
-	commonTest "github.com/TomBowyerResearchProject/common/test"
+	commonTest "github.com/EmotivesProject/common/test"
 	"github.com/stretchr/testify/assert"
 )
 

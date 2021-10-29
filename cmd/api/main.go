@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/middlewares"
-	commonPostgres "github.com/TomBowyerResearchProject/common/postgres"
-	"github.com/TomBowyerResearchProject/common/redis"
-	"github.com/TomBowyerResearchProject/common/verification"
+	"github.com/EmotivesProject/common/logger"
+	"github.com/EmotivesProject/common/middlewares"
+	commonPostgres "github.com/EmotivesProject/common/postgres"
+	"github.com/EmotivesProject/common/redis"
+	"github.com/EmotivesProject/common/verification"
 )
 
 const timeBeforeTimeout = 15

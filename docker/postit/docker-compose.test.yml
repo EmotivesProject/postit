@@ -2,7 +2,7 @@ version: '3'
 
 services:
   test_db:
-    image: ghcr.io/tombowyerresearchproject/postgres_db
+    image: ghcr.io/emotivesproject/postgres_db
     ports:
       - 5435:5432
     environment:
@@ -21,7 +21,7 @@ services:
       default:
 
   uacl_api:
-    image: ghcr.io/tombowyerresearchproject/uacl_api:latest
+    image: ghcr.io/emotivesproject/uacl_api:latest
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro

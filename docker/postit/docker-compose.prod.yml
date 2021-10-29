@@ -2,7 +2,7 @@ version: '3'
 
 services:
   api:
-    image: ghcr.io/tombowyerresearchproject/postit_api:latest
+    image: ghcr.io/emotivesproject/postit_api:latest
     volumes:
       - /etc/localtime:/etc/localtime:ro
     environment:

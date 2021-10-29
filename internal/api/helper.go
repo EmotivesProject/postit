@@ -10,9 +10,9 @@ import (
 	"postit/model"
 	"strconv"
 
-	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/redis"
-	"github.com/TomBowyerResearchProject/common/verification"
+	"github.com/EmotivesProject/common/logger"
+	"github.com/EmotivesProject/common/redis"
+	"github.com/EmotivesProject/common/verification"
 	"github.com/go-chi/chi"
 )
 

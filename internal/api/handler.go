@@ -11,9 +11,9 @@ import (
 	"postit/model"
 	"time"
 
-	"github.com/TomBowyerResearchProject/common/logger"
-	"github.com/TomBowyerResearchProject/common/redis"
-	"github.com/TomBowyerResearchProject/common/response"
+	"github.com/EmotivesProject/common/logger"
+	"github.com/EmotivesProject/common/redis"
+	"github.com/EmotivesProject/common/response"
 )
 
 var (
